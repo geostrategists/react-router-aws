@@ -4,13 +4,13 @@ import type {
   APIGatewayProxyStructuredResultV2
 } from 'aws-lambda'
 
-import { readableStreamToString } from '@remix-run/node'
+import { readableStreamToString } from '@react-router/node'
 
 import { isBinaryType } from '../binaryTypes'
 
-import { RemixAdapter } from './index'
+import { ReactRouterAdapter } from './index'
 
-function createRemixRequest(event: APIGatewayProxyEventV2): Request {
+function createReactRouterRequest(event: APIGatewayProxyEventV2): Request {
   const host = event.headers['x-forwarded-host'] || event.headers.host
   const search = event.rawQueryString.length ? `?${event.rawQueryString}` : ''
   const scheme = event.headers['x-forwarded-proto'] || 'http'
@@ -22,7 +22,7 @@ function createRemixRequest(event: APIGatewayProxyEventV2): Request {
 
   return new Request(url.href, {
     method: event.requestContext.http.method,
-    headers: createRemixHeaders(event.headers, event.cookies),
+    headers: createReactRouterHeaders(event.headers, event.cookies),
     body:
       event.body && event.isBase64Encoded
         ? isFormData
@@ -32,7 +32,7 @@ function createRemixRequest(event: APIGatewayProxyEventV2): Request {
   })
 }
 
-function createRemixHeaders(
+function createReactRouterHeaders(
   requestHeaders: APIGatewayProxyEventHeaders,
   requestCookies?: string[]
 ): Headers {
@@ -51,20 +51,11 @@ function createRemixHeaders(
   return headers
 }
 
-async function sendRemixResponse(
+async function sendReactRouterResponse(
   nodeResponse: Response
 ): Promise<APIGatewayProxyStructuredResultV2> {
-  const cookies: string[] = []
-
   // AWS API Gateway will send back set-cookies outside of response headers.
-  for (const [key, values] of Object.entries(nodeResponse.headers.raw())) {
-    if (key.toLowerCase() === 'set-cookie') {
-      for (const value of values) {
-        cookies.push(value)
-      }
-    }
-  }
-
+  const cookies = nodeResponse.headers.getSetCookie()
   if (cookies.length) {
     nodeResponse.headers.delete('Set-Cookie')
   }
@@ -90,17 +81,17 @@ async function sendRemixResponse(
   }
 }
 
-type ApiGatewayV2Adapter = RemixAdapter<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2>
+type ApiGatewayV2Adapter = ReactRouterAdapter<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2>
 
 const apiGatewayV2Adapter: ApiGatewayV2Adapter = {
-  createRemixRequest,
-  sendRemixResponse
+  createReactRouterRequest: createReactRouterRequest,
+  sendReactRouterResponse: sendReactRouterResponse
 }
 
 export {
-  createRemixRequest,
-  createRemixHeaders,
-  sendRemixResponse,
+  createReactRouterRequest,
+  createReactRouterHeaders,
+  sendReactRouterResponse,
   apiGatewayV2Adapter
 }
 

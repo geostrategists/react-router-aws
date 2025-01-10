@@ -9,13 +9,13 @@ import type {
 import type {
   AppLoadContext,
   ServerBuild,
-} from '@remix-run/node'
+} from 'react-router'
 
 import {
   createRequestHandler as createRemixRequestHandler
-} from '@remix-run/node'
+} from 'react-router'
 
-import { createRemixAdapter } from './adapters'
+import { createReactRouterAdapter } from './adapters'
 
 export enum AWSProxy {
   APIGatewayV1 = 'APIGatewayV1',
@@ -55,14 +55,14 @@ export function createRequestHandler({
   const handleRequest = createRemixRequestHandler(build, mode)
 
   return async (event: APIGatewayProxyEvent | APIGatewayProxyEventV2 | ALBEvent /*, context*/) => {
-    const awsAdapter = createRemixAdapter(awsProxy)
+    const awsAdapter = createReactRouterAdapter(awsProxy)
 
     let request
 
     try {
-      request = awsAdapter.createRemixRequest(event as APIGatewayProxyEvent & APIGatewayProxyEventV2 & ALBEvent)
+      request = awsAdapter.createReactRouterRequest(event as APIGatewayProxyEvent & APIGatewayProxyEventV2 & ALBEvent)
     } catch (e: any) {
-      return awsAdapter.sendRemixResponse(
+      return awsAdapter.sendReactRouterResponse(
         new Response(`Bad Request: ${e.message}`, { status: 400 }),
       )
     }
@@ -71,6 +71,6 @@ export function createRequestHandler({
 
     const response = (await handleRequest(request, loadContext)) as Response
 
-    return awsAdapter.sendRemixResponse(response)
+    return awsAdapter.sendReactRouterResponse(response)
   }
 }

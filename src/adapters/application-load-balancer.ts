@@ -4,14 +4,14 @@ import type {
   ALBResult
 } from 'aws-lambda'
 
-import { readableStreamToString } from '@remix-run/node'
+import { readableStreamToString } from '@react-router/node'
 import { URLSearchParams } from 'url'
 
 import { isBinaryType } from '../binaryTypes'
 
-import { RemixAdapter } from './index'
+import { ReactRouterAdapter } from './index'
 
-function createRemixRequest(event: ALBEvent): Request {
+function createReactRouterRequest(event: ALBEvent): Request {
   const headers = event?.headers || {}
   const host = headers['x-forwarded-host'] || headers.Host
   const scheme = headers['x-forwarded-proto'] || 'http'
@@ -50,7 +50,7 @@ function createRemixHeaders(
   return headers
 }
 
-async function sendRemixResponse(
+async function sendReactRouterResponse(
   nodeResponse: Response
 ): Promise<ALBResult> {
   const contentType = nodeResponse.headers.get('Content-Type')
@@ -73,17 +73,17 @@ async function sendRemixResponse(
   }
 }
 
-type ApplicationLoadBalancerAdapter = RemixAdapter<ALBEvent, ALBResult>
+type ApplicationLoadBalancerAdapter = ReactRouterAdapter<ALBEvent, ALBResult>
 
 const applicationLoadBalancerAdapter: ApplicationLoadBalancerAdapter = {
-  createRemixRequest,
-  sendRemixResponse
+  createReactRouterRequest,
+  sendReactRouterResponse,
 }
 
 export {
-  createRemixRequest,
+  createReactRouterRequest,
   createRemixHeaders,
-  sendRemixResponse,
+  sendReactRouterResponse,
   applicationLoadBalancerAdapter
 }
 

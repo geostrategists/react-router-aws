@@ -1,11 +1,3 @@
-import type {
-  ALBEvent,
-  ALBResult,
-  APIGatewayProxyEvent,
-  APIGatewayProxyEventV2,
-  APIGatewayProxyResult,
-  APIGatewayProxyStructuredResultV2
-} from 'aws-lambda'
 import type { ApiGatewayV1Adapter } from './api-gateway-v1'
 import type { ApiGatewayV2Adapter } from './api-gateway-v2'
 import type { ApplicationLoadBalancerAdapter } from './application-load-balancer'
@@ -16,12 +8,12 @@ import { apiGatewayV1Adapter } from './api-gateway-v1'
 import { apiGatewayV2Adapter } from './api-gateway-v2'
 import { applicationLoadBalancerAdapter } from './application-load-balancer'
 
-interface RemixAdapter<T, U> {
-  createRemixRequest: (event: T) => Request
-  sendRemixResponse: (nodeResponse: Response) => Promise<U>
+interface ReactRouterAdapter<T, U> {
+  createReactRouterRequest: (event: T) => Request
+  sendReactRouterResponse: (nodeResponse: Response) => Promise<U>
 }
 
-const createRemixAdapter = (awsProxy: AWSProxy): ApiGatewayV1Adapter | ApiGatewayV2Adapter | ApplicationLoadBalancerAdapter => {
+const createReactRouterAdapter = (awsProxy: AWSProxy): ApiGatewayV1Adapter | ApiGatewayV2Adapter | ApplicationLoadBalancerAdapter => {
   switch (awsProxy) {
     case AWSProxy.APIGatewayV1:
       return apiGatewayV1Adapter
@@ -34,9 +26,9 @@ const createRemixAdapter = (awsProxy: AWSProxy): ApiGatewayV1Adapter | ApiGatewa
 }
 
 export {
-  createRemixAdapter
+  createReactRouterAdapter
 }
 
 export type {
-  RemixAdapter
+  ReactRouterAdapter
 }

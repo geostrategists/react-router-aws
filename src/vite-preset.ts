@@ -1,9 +1,5 @@
 import type { BuildOptions } from 'esbuild'
-import type {
-  Preset,
-  VitePluginConfig
-} from '@remix-run/dev'
-import type { ResolvedVitePluginConfig } from '@remix-run/dev/dist/vite/plugin'
+import type { Config, Preset } from '@react-router/dev/dist/config'
 
 import * as esbuild from 'esbuild'
 import {
@@ -16,12 +12,15 @@ import { join } from 'path'
 
 import { AWSProxy } from './index'
 
-type AwsRemixConfig = {
+// Resolved config passed to BuildEndHook, the type is not exported anymore in react-router
+type ResolvedReactRouterConfig = Parameters<NonNullable<Config['buildEnd']>>[0]['reactRouterConfig']
+
+type AwsReactRouterConfig = {
   awsProxy?: AWSProxy,
   build?: BuildOptions
 }
 
-const defaultConfig: AwsRemixConfig = {
+const defaultConfig: AwsReactRouterConfig = {
   awsProxy: AWSProxy.APIGatewayV2,
   build: {
     logLevel: 'info',
@@ -31,17 +30,17 @@ const defaultConfig: AwsRemixConfig = {
     bundle: true,
     sourcemap: false,
     platform: 'node',
-    outfile: 'build/server/index.js', // will replace remix server build file
+    outfile: 'build/server/index.js', // will replace react router server build file
     allowOverwrite: true,
     write: true,
   }
 }
 
 const copyDefaultServerHandler = (
-  remixUserConfig: ResolvedVitePluginConfig,
-  config: AwsRemixConfig
+  reactRouterUserConfig: ResolvedReactRouterConfig,
+  config: AwsReactRouterConfig
 ) => {
-  const buildDirectory = remixUserConfig.buildDirectory ?? 'build'
+  const buildDirectory = reactRouterUserConfig.buildDirectory ?? 'build'
   const templateServerFile = join(__dirname, 'server.js')
   const destinationServerFile = join(buildDirectory, 'server.js')
 
@@ -59,38 +58,38 @@ const copyDefaultServerHandler = (
       )
       .replace(
         './build/server/index.js',
-        remixUserConfig.buildDirectory + '/server/' + remixUserConfig.serverBuildFile
+        reactRouterUserConfig.buildDirectory + '/server/' + reactRouterUserConfig.serverBuildFile
       )
 
     writeFileSync(destinationServerFile, serverFileWithConfig, 'utf8')
   }
 }
 
-const cleanupHandler = (remixUserConfig: ResolvedVitePluginConfig) => {
+const cleanupHandler = (reactRouterUserConfig: ResolvedReactRouterConfig) => {
   rmSync(
-    join(remixUserConfig.buildDirectory ?? 'build', 'server.js')
+    join(reactRouterUserConfig.buildDirectory ?? 'build', 'server.js')
   )
 }
 
-const buildEndHandler: (config: AwsRemixConfig) => VitePluginConfig['buildEnd'] =
+const buildEndHandler: (config: AwsReactRouterConfig) => Config['buildEnd'] =
   (config) =>
     async (
       {
-        remixConfig,
+        reactRouterConfig,
         viteConfig
       }
     ) => {
       console.log('👷 Building for AWS...')
 
-      const isEsm = [remixConfig.serverModuleFormat, config.build?.format].includes('esm')
+      const isEsm = [reactRouterConfig.serverModuleFormat, config.build?.format].includes('esm')
 
       const mergedConfig = {
         ...defaultConfig,
         ...config,
         build: {
           ...defaultConfig.build,
-          format: remixConfig.serverModuleFormat,
-          outfile: remixConfig.buildDirectory + '/server/' + remixConfig.serverBuildFile,
+          format: reactRouterConfig.serverModuleFormat,
+          outfile: reactRouterConfig.buildDirectory + '/server/' + reactRouterConfig.serverBuildFile,
           publicPath: viteConfig.base,
           minify: Boolean(viteConfig.build.minify),
           sourcemap: viteConfig.build.sourcemap,
@@ -114,7 +113,7 @@ const buildEndHandler: (config: AwsRemixConfig) => VitePluginConfig['buildEnd'] 
       const { build } = mergedConfig
 
       if (!config?.build?.entryPoints) {
-        copyDefaultServerHandler(remixConfig, mergedConfig)
+        copyDefaultServerHandler(reactRouterConfig, mergedConfig)
       }
 
       try {
@@ -129,17 +128,17 @@ const buildEndHandler: (config: AwsRemixConfig) => VitePluginConfig['buildEnd'] 
         if (!config?.build?.entryPoints) {
           console.log('🧹 Cleaning up...')
 
-          cleanupHandler(remixConfig)
+          cleanupHandler(reactRouterConfig)
 
           console.log('🧹 Clean up completed!')
         }
       }
     }
 
-export function awsPreset(config: AwsRemixConfig = {}): Preset {
+export function awsPreset(config: AwsReactRouterConfig = {}): Preset {
   return {
     name: 'aws-preset',
-    remixConfig: () => ({
+    reactRouterConfig: () => ({
       buildEnd: buildEndHandler(config),
     }),
   }

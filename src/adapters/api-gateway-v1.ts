@@ -4,14 +4,14 @@ import type {
   APIGatewayProxyResult
 } from 'aws-lambda'
 
-import { readableStreamToString } from '@remix-run/node'
+import { readableStreamToString } from '@react-router/node'
 import { URLSearchParams } from 'url'
 
 import { isBinaryType } from '../binaryTypes'
 
-import { RemixAdapter } from './index'
+import { ReactRouterAdapter } from './index'
 
-function createRemixRequest(event: APIGatewayProxyEvent): Request {
+function createReactRouterRequest(event: APIGatewayProxyEvent): Request {
   const host = event.headers['x-forwarded-host'] || event.headers.Host
   const scheme = event.headers['x-forwarded-proto'] || 'http'
 
@@ -25,7 +25,7 @@ function createRemixRequest(event: APIGatewayProxyEvent): Request {
 
   return new Request(url.href, {
     method: event.requestContext.httpMethod,
-    headers: createRemixHeaders(event.headers),
+    headers: createReactRouterHeaders(event.headers),
     body:
       event.body && event.isBase64Encoded
         ? isFormData
@@ -35,7 +35,7 @@ function createRemixRequest(event: APIGatewayProxyEvent): Request {
   })
 }
 
-function createRemixHeaders(
+function createReactRouterHeaders(
   requestHeaders: APIGatewayProxyEventHeaders
 ): Headers {
   const headers = new Headers()
@@ -49,7 +49,7 @@ function createRemixHeaders(
   return headers
 }
 
-async function sendRemixResponse(
+async function sendReactRouterResponse(
   nodeResponse: Response
 ): Promise<APIGatewayProxyResult> {
   const contentType = nodeResponse.headers.get('Content-Type')
@@ -72,17 +72,17 @@ async function sendRemixResponse(
   }
 }
 
-type ApiGatewayV1Adapter = RemixAdapter<APIGatewayProxyEvent, APIGatewayProxyResult>
+type ApiGatewayV1Adapter = ReactRouterAdapter<APIGatewayProxyEvent, APIGatewayProxyResult>
 
 const apiGatewayV1Adapter: ApiGatewayV1Adapter = {
-  createRemixRequest,
-  sendRemixResponse
+  createReactRouterRequest,
+  sendReactRouterResponse,
 }
 
 export {
-  createRemixRequest,
-  createRemixHeaders,
-  sendRemixResponse,
+  createReactRouterRequest,
+  createReactRouterHeaders,
+  sendReactRouterResponse,
   apiGatewayV1Adapter
 }
 

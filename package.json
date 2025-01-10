@@ -1,13 +1,13 @@
 {
-  "name": "remix-aws",
-  "version": "1.2.2",
-  "description": "AWS adapter for Remix",
+  "name": "react-router-aws",
+  "version": "2.0.0-beta.1",
+  "description": "AWS adapter for React Router v7",
   "bugs": {
-    "url": "https://github.com/wingleung/remix-aws/issues"
+    "url": "https://github.com/oxc/react-router-aws/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/wingleung/remix-aws.git"
+    "url": "git+https://github.com/oxc/react-router-aws.git"
   },
   "scripts": {
     "build": "tsup --publicDir templates"
@@ -20,7 +20,7 @@
     "@types/aws-lambda": "^8.10.125"
   },
   "devDependencies": {
-    "@types/node": "^18.18.7",
+    "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^7.7.0",
     "@typescript-eslint/parser": "^7.7.0",
     "eslint": "^8.19.0",
@@ -31,12 +31,13 @@
     "typescript": "^5.4.5"
   },
   "peerDependencies": {
-    "@remix-run/dev": "^1.6.2 || ^2.0.1",
-    "@remix-run/node": "^1.6.2 || ^2.0.1",
-    "esbuild": "^0.17.6"
+    "react-router": "^7.0.0",
+    "@react-router/dev": "^7.0.0",
+    "@react-router/node": "^7.0.0",
+    "esbuild": "^0.21.0 || ^0.22.0 || ^0.23.0 || ^0.24.0"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "files": [
     "dist/",
