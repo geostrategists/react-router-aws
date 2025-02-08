@@ -80,7 +80,8 @@ import type { PluginOption } from 'vite'
 import type { Preset } from '@remix-run/dev'
 import { reactRouter } from "@react-router/dev/vite";
 
-import { awsPreset, AWSProxy } from 'react-router-aws'
+import { awsPreset } from 'react-router-aws/vite';
+import { AWSProxy } from 'react-router-aws';
 import { defineConfig } from 'vite'
 
 export default defineConfig(

@@ -1,6 +1,6 @@
 {
   "name": "react-router-aws",
-  "version": "2.0.0-beta.1",
+  "version": "2.0.0-beta.2",
   "description": "AWS adapter for React Router v7",
   "bugs": {
     "url": "https://github.com/oxc/react-router-aws/issues"
