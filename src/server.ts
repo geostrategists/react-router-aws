@@ -9,6 +9,8 @@ import type {
 import type {
   AppLoadContext,
   ServerBuild,
+  UNSAFE_MiddlewareEnabled as MiddlewareEnabled,
+  unstable_InitialContext,
 } from 'react-router'
 
 import {
@@ -23,6 +25,8 @@ export enum AWSProxy {
   ALB = 'ALB',
   FunctionURL = 'FunctionURL'
 }
+
+type MaybePromise<T> = T | Promise<T>;
 
 /**
  * A function that returns the value to use as `context` in route `loader` and
@@ -67,9 +71,9 @@ export function createRequestHandler({
       )
     }
 
-    const loadContext = getLoadContext?.(event)
+    const loadContext = await getLoadContext?.(event)
 
-    const response = (await handleRequest(request, loadContext)) as Response
+    const response = await handleRequest(request, loadContext)
 
     return awsAdapter.sendReactRouterResponse(response)
   }
