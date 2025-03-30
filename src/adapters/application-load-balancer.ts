@@ -24,9 +24,14 @@ function createReactRouterRequest(event: ALBEvent): Request {
     'multipart/form-data'
   )
 
+  // Note: No current way to abort these for AWS, but our router expects
+  // requests to contain a signal, so it can detect aborted requests
+  const controller = new AbortController()
+
   return new Request(url.href, {
     method: event.httpMethod,
     headers: createReactRouterHeaders(headers),
+    signal: controller.signal,
     body:
       event.body && event.isBase64Encoded
         ? isFormData
