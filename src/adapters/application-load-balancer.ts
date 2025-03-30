@@ -26,7 +26,7 @@ function createReactRouterRequest(event: ALBEvent): Request {
 
   return new Request(url.href, {
     method: event.httpMethod,
-    headers: createRemixHeaders(headers),
+    headers: createReactRouterHeaders(headers),
     body:
       event.body && event.isBase64Encoded
         ? isFormData
@@ -36,7 +36,7 @@ function createReactRouterRequest(event: ALBEvent): Request {
   })
 }
 
-function createRemixHeaders(
+function createReactRouterHeaders(
   requestHeaders: ALBEventHeaders
 ): Headers {
   const headers = new Headers()
@@ -82,7 +82,7 @@ const applicationLoadBalancerAdapter: ApplicationLoadBalancerAdapter = {
 
 export {
   createReactRouterRequest,
-  createRemixHeaders,
+  createReactRouterHeaders,
   sendReactRouterResponse,
   applicationLoadBalancerAdapter
 }

@@ -14,7 +14,7 @@ import type {
 } from 'react-router'
 
 import {
-  createRequestHandler as createRemixRequestHandler
+  createRequestHandler as createReactRouterRequestHandler
 } from 'react-router'
 
 import { createReactRouterAdapter } from './adapters'
@@ -37,13 +37,15 @@ type MaybePromise<T> = T | Promise<T>;
  */
 export type GetLoadContextFunction = (
   event: APIGatewayProxyEventV2 | APIGatewayProxyEvent | ALBEvent
-) => AppLoadContext;
+) => MiddlewareEnabled extends true
+  ? MaybePromise<unstable_InitialContext>
+  : MaybePromise<AppLoadContext>;
 
 export type RequestHandler = APIGatewayProxyHandlerV2 | APIGatewayProxyHandler | ALBHandler;
 
 /**
- * Returns a request handler for Architect that serves the response using
- * Remix.
+ * Returns a request handler for AWS that serves the response using
+ * React Router.
  */
 export function createRequestHandler({
   build,
@@ -56,7 +58,7 @@ export function createRequestHandler({
   mode?: string;
   awsProxy?: AWSProxy;
 }): RequestHandler {
-  const handleRequest = createRemixRequestHandler(build, mode)
+  const handleRequest = createReactRouterRequestHandler(build, mode)
 
   return async (event: APIGatewayProxyEvent | APIGatewayProxyEventV2 | ALBEvent /*, context*/) => {
     const awsAdapter = createReactRouterAdapter(awsProxy)
