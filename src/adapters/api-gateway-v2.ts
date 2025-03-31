@@ -10,7 +10,7 @@ import { isBinaryType } from '../binaryTypes'
 
 import { ReactRouterAdapter } from './index'
 
-function createReactRouterRequest(event: APIGatewayProxyEventV2): Request {
+function createReactRouterRequestAPIGateywayV2(event: APIGatewayProxyEventV2): Request {
   const host = event.headers['x-forwarded-host'] || event.headers.host
   const search = event.rawQueryString.length ? `?${event.rawQueryString}` : ''
   const scheme = event.headers['x-forwarded-proto'] || 'http'
@@ -25,7 +25,7 @@ function createReactRouterRequest(event: APIGatewayProxyEventV2): Request {
 
   return new Request(url.href, {
     method: event.requestContext.http.method,
-    headers: createReactRouterHeaders(event.headers, event.cookies),
+    headers: createReactRouterHeadersAPIGatewayV2(event.headers, event.cookies),
     signal: controller.signal,
     body:
       event.body && event.isBase64Encoded
@@ -36,7 +36,7 @@ function createReactRouterRequest(event: APIGatewayProxyEventV2): Request {
   })
 }
 
-function createReactRouterHeaders(
+function createReactRouterHeadersAPIGatewayV2(
   requestHeaders: APIGatewayProxyEventHeaders,
   requestCookies?: string[]
 ): Headers {
@@ -55,7 +55,7 @@ function createReactRouterHeaders(
   return headers
 }
 
-async function sendReactRouterResponse(
+async function sendReactRouterResponseAPIGatewayV2(
   nodeResponse: Response
 ): Promise<APIGatewayProxyStructuredResultV2> {
   // AWS API Gateway will send back set-cookies outside of response headers.
@@ -85,20 +85,9 @@ async function sendReactRouterResponse(
   }
 }
 
-type ApiGatewayV2Adapter = ReactRouterAdapter<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2>
+export type ApiGatewayV2Adapter = ReactRouterAdapter<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2>
 
-const apiGatewayV2Adapter: ApiGatewayV2Adapter = {
-  createReactRouterRequest: createReactRouterRequest,
-  sendReactRouterResponse: sendReactRouterResponse
-}
-
-export {
-  createReactRouterRequest,
-  createReactRouterHeaders,
-  sendReactRouterResponse,
-  apiGatewayV2Adapter
-}
-
-export type {
-  ApiGatewayV2Adapter
+export const apiGatewayV2Adapter: ApiGatewayV2Adapter = {
+  createReactRouterRequest: createReactRouterRequestAPIGateywayV2,
+  sendReactRouterResponse: sendReactRouterResponseAPIGatewayV2
 }

@@ -1,17 +1,27 @@
-import { defineConfig } from 'tsup'
+import { defineConfig } from "tsup";
 
-export default defineConfig({
-  name: 'tsup',
-  entry: ['src/index.ts', 'src/vite.ts'],
-  target: 'node20',
-  format: [
-    'cjs',
-    'esm'
-  ],
-  dts: true,
-  sourcemap: true,
-  clean: true,
-  external: [
-    'esbuild'
-  ]
-})
+import pkg from "./package.json";
+
+const entry = ["src/index.ts"];
+
+export default defineConfig([
+  {
+    clean: true,
+    entry,
+    format: ["cjs", "esm"],
+    outDir: "dist",
+    dts: true,
+    banner: {
+      js: `/**
+* ${pkg.name} v${pkg.version}
+*
+* Copyright (c) Geostrategists Consulting GmbH
+*
+* This source code is licensed under the MIT license found in the
+* LICENSE.md file in the root directory of this source tree.
+*
+* @license MIT
+*/`,
+    },
+  },
+]);
