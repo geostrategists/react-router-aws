@@ -1,47 +1,104 @@
 {
-  "name": "react-router-aws",
-  "version": "2.0.0-beta.2",
+  "name": "@geostrategists/react-router-aws",
+  "version": "0.0.1",
   "description": "AWS adapter for React Router v7",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/oxc/react-router-aws/issues"
+    "url": "https://github.com/geostrategists/react-router-aws/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/oxc/react-router-aws.git"
+    "url": "git+https://github.com/geostrategists/react-router-aws.git"
+  },
+  "exports": {
+    ".": {
+      "node": {
+        "types": "./dist/index.d.ts",
+        "module-sync": "./dist/index.mjs",
+        "default": "./dist/index.js"
+      },
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "default": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "tsup --publicDir templates"
-  },
-  "license": "MIT",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "typings": "dist/index.d.ts",
-  "dependencies": {
-    "@types/aws-lambda": "^8.10.125"
-  },
-  "devDependencies": {
-    "@types/node": "^20.0.0",
-    "@typescript-eslint/eslint-plugin": "^7.7.0",
-    "@typescript-eslint/parser": "^7.7.0",
-    "eslint": "^8.19.0",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-simple-import-sort": "^7.0.0",
-    "prettier": "^2.7.1",
-    "tsup": "^8.0.2",
-    "typescript": "^5.4.5"
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc && tsup",
+    "prepack": "yarn build && yarn npmignore --auto",
+    "prepare": "husky",
+    "release": "semantic-release"
   },
   "peerDependencies": {
-    "react-router": "^7.3.0",
     "@react-router/dev": "^7.3.0",
     "@react-router/node": "^7.3.0",
-    "esbuild": "^0.21.0 || ^0.22.0 || ^0.23.0 || ^0.24.0"
+    "react-router": "^7.3.0"
   },
-  "engines": {
-    "node": ">=20"
+  "devDependencies": {
+    "@eslint/js": "^9.22.0",
+    "@react-router/dev": "^7.3.0",
+    "@react-router/node": "^7.3.0",
+    "@semantic-release/exec": "^7.0.3",
+    "@types/aws-lambda": "^8.10.125",
+    "@types/node": "^20",
+    "eslint": "^9.22.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.0",
+    "npmignore": "^0.3.1",
+    "prettier": "3.5.3",
+    "react-router": "^7.3.0",
+    "semantic-release": "^24.2.3",
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.26.1"
   },
-  "files": [
-    "dist/",
-    "LICENSE.md",
-    "README.md"
-  ]
+  "packageManager": "yarn@4.7.0+sha256.293632d8a095d8ea4786eb2c5798c83c37544abed17ed31186a3ec4549a07c06",
+  "release": {
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      [
+        "@semantic-release/exec",
+        {
+          "verifyConditionsCmd": "echo //npm.pkg.github.com/:_authToken=${process.env.GITHUB_TOKEN} > /tmp/github.npmrc && npm whoami --userconfig /tmp/github.npmrc --registry https://npm.pkg.github.com/",
+          "publishCmd": "npm publish --userconfig /tmp/github.npmrc --tag ${nextRelease.channel || 'latest'} --registry https://npm.pkg.github.com/ --no-git-tag-version",
+          "successCmd": "rm /tmp/github.npmrc",
+          "failCmd": "rm /tmp/github.npmrc"
+        }
+      ],
+      "@semantic-release/npm",
+      "@semantic-release/github"
+    ]
+  },
+  "publishConfig": {
+    "ignore": [
+      "!dist/**",
+      "src/",
+      ".*",
+      "tsconfig.json",
+      "tsup.config.ts"
+    ],
+    "access": "public",
+    "provenance": true
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,cjs,mjs}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "!(*.ts|*.tsx|*.js|*.cjs|*.mjs)": "prettier --ignore-unknown --write"
+  },
+  "prettier": {
+    "printWidth": 120,
+    "trailingComma": "all"
+  }
 }

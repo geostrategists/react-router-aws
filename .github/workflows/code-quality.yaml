@@ -1,0 +1,49 @@
+name: Code Quality
+
+on:
+  pull_request:
+  push:
+    branches: ["main"]
+
+jobs:
+  quality-check:
+    name: Check Code Quality
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Cache .yarn/cache
+        uses: actions/cache@v4
+        env:
+          cache-name: yarn-cache
+        with:
+          path: .yarn/cache
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.cache-name }}
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Run ESLint
+        run: yarn lint
+
+      - name: Check code formatting
+        run: yarn format:check
+
+      - name: Run Typecheck
+        run: yarn typecheck
