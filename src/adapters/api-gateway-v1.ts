@@ -11,7 +11,7 @@ import { isBinaryType } from '../binaryTypes'
 
 import { ReactRouterAdapter } from './index'
 
-function createReactRouterRequest(event: APIGatewayProxyEvent): Request {
+function createReactRouterRequestAPIGatewayV1(event: APIGatewayProxyEvent): Request {
   const host = event.headers['x-forwarded-host'] || event.headers.Host
   const scheme = event.headers['x-forwarded-proto'] || 'http'
 
@@ -28,7 +28,7 @@ function createReactRouterRequest(event: APIGatewayProxyEvent): Request {
 
   return new Request(url.href, {
     method: event.requestContext.httpMethod,
-    headers: createReactRouterHeaders(event.headers),
+    headers: createReactRouterHeadersAPIGatewayV1(event.headers),
     signal: controller.signal,
     body:
       event.body && event.isBase64Encoded
@@ -39,7 +39,7 @@ function createReactRouterRequest(event: APIGatewayProxyEvent): Request {
   })
 }
 
-function createReactRouterHeaders(
+function createReactRouterHeadersAPIGatewayV1(
   requestHeaders: APIGatewayProxyEventHeaders
 ): Headers {
   const headers = new Headers()
@@ -53,7 +53,7 @@ function createReactRouterHeaders(
   return headers
 }
 
-async function sendReactRouterResponse(
+async function sendReactRouterResponseAPIGatewayV1(
   nodeResponse: Response
 ): Promise<APIGatewayProxyResult> {
   const contentType = nodeResponse.headers.get('Content-Type')
@@ -76,20 +76,9 @@ async function sendReactRouterResponse(
   }
 }
 
-type ApiGatewayV1Adapter = ReactRouterAdapter<APIGatewayProxyEvent, APIGatewayProxyResult>
+export type ApiGatewayV1Adapter = ReactRouterAdapter<APIGatewayProxyEvent, APIGatewayProxyResult>
 
-const apiGatewayV1Adapter: ApiGatewayV1Adapter = {
-  createReactRouterRequest,
-  sendReactRouterResponse,
-}
-
-export {
-  createReactRouterRequest,
-  createReactRouterHeaders,
-  sendReactRouterResponse,
-  apiGatewayV1Adapter
-}
-
-export type {
-  ApiGatewayV1Adapter
+export const apiGatewayV1Adapter: ApiGatewayV1Adapter = {
+  createReactRouterRequest: createReactRouterRequestAPIGatewayV1,
+  sendReactRouterResponse: sendReactRouterResponseAPIGatewayV1,
 }

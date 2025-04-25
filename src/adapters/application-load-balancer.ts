@@ -11,7 +11,7 @@ import { isBinaryType } from '../binaryTypes'
 
 import { ReactRouterAdapter } from './index'
 
-function createReactRouterRequest(event: ALBEvent): Request {
+function createReactRouterRequestALB(event: ALBEvent): Request {
   const headers = event?.headers || {}
   const host = headers['x-forwarded-host'] || headers.Host
   const scheme = headers['x-forwarded-proto'] || 'http'
@@ -30,7 +30,7 @@ function createReactRouterRequest(event: ALBEvent): Request {
 
   return new Request(url.href, {
     method: event.httpMethod,
-    headers: createReactRouterHeaders(headers),
+    headers: createReactRouterHeadersALB(headers),
     signal: controller.signal,
     body:
       event.body && event.isBase64Encoded
@@ -41,7 +41,7 @@ function createReactRouterRequest(event: ALBEvent): Request {
   })
 }
 
-function createReactRouterHeaders(
+function createReactRouterHeadersALB(
   requestHeaders: ALBEventHeaders
 ): Headers {
   const headers = new Headers()
@@ -55,7 +55,7 @@ function createReactRouterHeaders(
   return headers
 }
 
-async function sendReactRouterResponse(
+async function sendReactRouterResponseALB(
   nodeResponse: Response
 ): Promise<ALBResult> {
   const contentType = nodeResponse.headers.get('Content-Type')
@@ -78,20 +78,9 @@ async function sendReactRouterResponse(
   }
 }
 
-type ApplicationLoadBalancerAdapter = ReactRouterAdapter<ALBEvent, ALBResult>
+export type ApplicationLoadBalancerAdapter = ReactRouterAdapter<ALBEvent, ALBResult>
 
-const applicationLoadBalancerAdapter: ApplicationLoadBalancerAdapter = {
-  createReactRouterRequest,
-  sendReactRouterResponse,
-}
-
-export {
-  createReactRouterRequest,
-  createReactRouterHeaders,
-  sendReactRouterResponse,
-  applicationLoadBalancerAdapter
-}
-
-export type {
-  ApplicationLoadBalancerAdapter
+export const applicationLoadBalancerAdapter: ApplicationLoadBalancerAdapter = {
+  createReactRouterRequest: createReactRouterRequestALB,
+  sendReactRouterResponse: sendReactRouterResponseALB,
 }
