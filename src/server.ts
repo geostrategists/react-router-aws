@@ -63,8 +63,10 @@ export function createRequestHandler({
 
     try {
       request = awsAdapter.createReactRouterRequest(event as APIGatewayProxyEvent & APIGatewayProxyEventV2 & ALBEvent);
-    } catch (e: any) {
-      return awsAdapter.sendReactRouterResponse(new Response(`Bad Request: ${e.message}`, { status: 400 }));
+    } catch (e: unknown) {
+      return awsAdapter.sendReactRouterResponse(
+        new Response(`Bad Request: ${e instanceof Error ? e.message : e}`, { status: 400 }),
+      );
     }
 
     const loadContext = await getLoadContext?.(event);
