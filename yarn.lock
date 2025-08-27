@@ -620,7 +620,7 @@ __metadata:
     "@react-router/dev": "npm:^7.3.0"
     "@react-router/node": "npm:^7.3.0"
     "@semantic-release/exec": "npm:^7.0.3"
-    "@types/aws-lambda": "npm:^8.10.125"
+    "@types/aws-lambda": "npm:^8.10.152"
     "@types/node": "npm:^20"
     eslint: "npm:^9.22.0"
     husky: "npm:^9.1.7"
@@ -1732,10 +1732,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/aws-lambda@npm:^8.10.125":
-  version: 8.10.148
-  resolution: "@types/aws-lambda@npm:8.10.148"
-  checksum: 10/73bbb423969a50e8911227892fcafc770f8e75f55a9913679d0e65e9eb01723eefd0362161ad6acdf38ffe7da5c319f22cc4de63724d97bcf1f9951f9173f64d
+"@types/aws-lambda@npm:^8.10.152":
+  version: 8.10.152
+  resolution: "@types/aws-lambda@npm:8.10.152"
+  checksum: 10/e47b8bf49b476c8723ed75fe04ea3bb3db8ba0809dca36012a66345cade1999a422fb6f24aaabd0bf035831cdfa8430c698732ef385172902b8d2d2a4db9ac29
   languageName: node
   linkType: hard
 

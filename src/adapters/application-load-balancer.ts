@@ -71,6 +71,7 @@ async function sendReactRouterResponseALB(nodeResponse: Response): Promise<ALBRe
 export type ApplicationLoadBalancerAdapter = ReactRouterAdapter<ALBEvent, ALBResult>;
 
 export const applicationLoadBalancerAdapter: ApplicationLoadBalancerAdapter = {
+  wrapHandler: (handler) => (e) => handler(e),
   createReactRouterRequest: createReactRouterRequestALB,
   sendReactRouterResponse: sendReactRouterResponseALB,
 };

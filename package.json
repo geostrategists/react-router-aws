@@ -48,7 +48,7 @@
     "@react-router/dev": "^7.3.0",
     "@react-router/node": "^7.3.0",
     "@semantic-release/exec": "^7.0.3",
-    "@types/aws-lambda": "^8.10.125",
+    "@types/aws-lambda": "^8.10.152",
     "@types/node": "^20",
     "eslint": "^9.22.0",
     "husky": "^9.1.7",
