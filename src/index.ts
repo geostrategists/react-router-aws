@@ -1,2 +1,9 @@
-export type { GetLoadContextFunction, RequestHandler } from "./server";
-export { AWSProxy, createRequestHandler } from "./server";
+export type { GetLoadContextFunction } from "./server";
+export {
+  createALBRequestHandler,
+  createAPIGatewayV1RequestHandler,
+  createAPIGatewayV2RequestHandler,
+  createFunctionURLRequestHandler,
+  createFunctionURLStreamingRequestHandler,
+} from "./server";
+export { AWSProxy, createRequestHandler } from "./legacy";

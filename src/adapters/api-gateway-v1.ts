@@ -69,6 +69,7 @@ async function sendReactRouterResponseAPIGatewayV1(nodeResponse: Response): Prom
 export type ApiGatewayV1Adapter = ReactRouterAdapter<APIGatewayProxyEvent, APIGatewayProxyResult>;
 
 export const apiGatewayV1Adapter: ApiGatewayV1Adapter = {
+  wrapHandler: (handler) => (e) => handler(e),
   createReactRouterRequest: createReactRouterRequestAPIGatewayV1,
   sendReactRouterResponse: sendReactRouterResponseAPIGatewayV1,
 };

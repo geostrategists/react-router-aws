@@ -48,7 +48,7 @@
     "@react-router/dev": "^7.3.0",
     "@react-router/node": "^7.3.0",
     "@semantic-release/exec": "^7.0.3",
-    "@types/aws-lambda": "^8.10.125",
+    "@types/aws-lambda": "^8.10.152",
     "@types/node": "^20",
     "eslint": "^9.22.0",
     "husky": "^9.1.7",
@@ -58,10 +58,10 @@
     "react-router": "^7.3.0",
     "semantic-release": "^24.2.3",
     "tsup": "^8.4.0",
-    "typescript": "^5.8.2",
-    "typescript-eslint": "^8.26.1"
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.41.0"
   },
-  "packageManager": "yarn@4.7.0+sha256.293632d8a095d8ea4786eb2c5798c83c37544abed17ed31186a3ec4549a07c06",
+  "packageManager": "yarn@4.9.4+sha512.7b1cb0b62abba6a537b3a2ce00811a843bea02bcf53138581a6ae5b1bf563f734872bd47de49ce32a9ca9dcaff995aa789577ffb16811da7c603dcf69e73750b",
   "release": {
     "plugins": [
       "@semantic-release/commit-analyzer",
