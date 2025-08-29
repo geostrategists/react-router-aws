@@ -1,24 +1,33 @@
 import { ReactRouterAdapter } from "./index";
 import type { LambdaFunctionURLEvent } from "aws-lambda";
-import { apiGatewayV2Adapter } from "./api-gateway-v2";
+import { createReactRouterRequestAPIGateywayV2, extractAPIGatewayV2ResponseMetadata } from "./api-gateway-v2";
 import { writeReadableStreamToWritable } from "@react-router/node";
-import stream from "node:stream/promises";
 import { StreamifyHandler } from "aws-lambda/handler";
+
+const emptyStream = () =>
+  new ReadableStream({
+    start(controller) {
+      controller.enqueue("");
+      controller.close();
+    },
+  });
 
 const sendReactRouterResponseFunctionUrlStreaming = async (
   response: Response,
   responseStream: awslambda.HttpResponseStream,
 ) => {
-  const httpResponseStream = awslambda.HttpResponseStream.from(responseStream, {
-    statusCode: response.status,
-    headers: Object.fromEntries(response.headers.entries()),
-  });
+  const metadata = extractAPIGatewayV2ResponseMetadata(response);
 
-  if (response.body) {
-    await writeReadableStreamToWritable(response.body, httpResponseStream);
-  } else {
-    await stream.finished(httpResponseStream);
+  let body = response.body;
+  if (!body) {
+    // Function URL needs a write to happen on the stream, otherwise it won't send headers.
+    // See https://github.com/fastify/aws-lambda-fastify/issues/154#issuecomment-2614521719
+    body = emptyStream();
   }
+
+  const httpResponseStream = awslambda.HttpResponseStream.from(responseStream, metadata);
+
+  await writeReadableStreamToWritable(body, httpResponseStream);
 };
 
 export type FunctionUrlStreamingAdapter = ReactRouterAdapter<
@@ -30,6 +39,6 @@ export type FunctionUrlStreamingAdapter = ReactRouterAdapter<
 
 export const functionUrlStreamingAdapter: FunctionUrlStreamingAdapter = {
   wrapHandler: awslambda.streamifyResponse,
-  createReactRouterRequest: apiGatewayV2Adapter.createReactRouterRequest,
+  createReactRouterRequest: createReactRouterRequestAPIGateywayV2,
   sendReactRouterResponse: sendReactRouterResponseFunctionUrlStreaming,
 };

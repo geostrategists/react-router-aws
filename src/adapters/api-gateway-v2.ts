@@ -10,7 +10,7 @@ import { isBinaryType } from "../binaryTypes";
 
 import { ReactRouterAdapter } from "./index";
 
-function createReactRouterRequestAPIGateywayV2(event: APIGatewayProxyEventV2): Request {
+export function createReactRouterRequestAPIGateywayV2(event: APIGatewayProxyEventV2): Request {
   const host = event.headers["x-forwarded-host"] || event.headers.host;
   const search = event.rawQueryString.length ? `?${event.rawQueryString}` : "";
   const scheme = event.headers["x-forwarded-proto"] || "http";
@@ -53,32 +53,40 @@ function createReactRouterHeadersAPIGatewayV2(
   return headers;
 }
 
-async function sendReactRouterResponseAPIGatewayV2(nodeResponse: Response): Promise<APIGatewayProxyStructuredResultV2> {
+export function extractAPIGatewayV2ResponseMetadata(nodeResponse: Response): {
+  statusCode: number;
+  headers: Record<string, string>;
+  cookies: string[];
+} {
   // AWS API Gateway will send back set-cookies outside of response headers.
   const cookies = nodeResponse.headers.getSetCookie();
   if (cookies.length) {
     nodeResponse.headers.delete("Set-Cookie");
   }
 
-  const contentType = nodeResponse.headers.get("Content-Type");
-  const isBase64Encoded = isBinaryType(contentType);
-  let body: string | undefined;
-
-  if (nodeResponse.body) {
-    if (isBase64Encoded) {
-      body = await readableStreamToString(nodeResponse.body, "base64");
-    } else {
-      body = await nodeResponse.text();
-    }
-  }
-
   return {
     statusCode: nodeResponse.status,
     headers: Object.fromEntries(nodeResponse.headers.entries()),
     cookies,
-    body,
-    isBase64Encoded,
   };
+}
+
+async function sendReactRouterResponseAPIGatewayV2(nodeResponse: Response): Promise<APIGatewayProxyStructuredResultV2> {
+  const result: APIGatewayProxyStructuredResultV2 = extractAPIGatewayV2ResponseMetadata(nodeResponse);
+
+  const contentType = nodeResponse.headers.get("Content-Type");
+
+  result.isBase64Encoded = isBinaryType(contentType);
+
+  if (nodeResponse.body) {
+    if (result.isBase64Encoded) {
+      result.body = await readableStreamToString(nodeResponse.body, "base64");
+    } else {
+      result.body = await nodeResponse.text();
+    }
+  }
+
+  return result;
 }
 
 export type ApiGatewayV2Adapter = ReactRouterAdapter<APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2>;
