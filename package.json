@@ -36,7 +36,9 @@
     "build": "tsc && tsup",
     "prepack": "yarn build && yarn npmignore --auto",
     "prepare": "husky",
-    "release": "semantic-release"
+    "release": "semantic-release",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "peerDependencies": {
     "@react-router/dev": "^7.3.0",
@@ -50,16 +52,20 @@
     "@semantic-release/exec": "^7.0.3",
     "@types/aws-lambda": "^8.10.152",
     "@types/node": "^20",
+    "@types/react": "^19",
+    "@vitest/coverage-v8": "^2.1.8",
     "eslint": "^9.22.0",
     "husky": "^9.1.7",
     "lint-staged": "^15.5.0",
     "npmignore": "^0.3.1",
     "prettier": "3.5.3",
+    "react": "^19.1.1",
     "react-router": "^7.3.0",
     "semantic-release": "^24.2.3",
     "tsup": "^8.4.0",
     "typescript": "^5.9.2",
-    "typescript-eslint": "^8.41.0"
+    "typescript-eslint": "^8.41.0",
+    "vitest": "^2.1.8"
   },
   "packageManager": "yarn@4.9.4+sha512.7b1cb0b62abba6a537b3a2ce00811a843bea02bcf53138581a6ae5b1bf563f734872bd47de49ce32a9ca9dcaff995aa789577ffb16811da7c603dcf69e73750b",
   "release": {
