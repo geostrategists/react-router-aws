@@ -39,7 +39,7 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
-      - name: Run ESLint
+      - name: Run Lint
         run: yarn lint
 
       - name: Check code formatting
@@ -47,3 +47,6 @@ jobs:
 
       - name: Run Typecheck
         run: yarn typecheck
+
+      - name: Run Tests
+        run: yarn test

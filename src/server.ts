@@ -1,14 +1,14 @@
 import {
-  AppLoadContext,
+  type AppLoadContext,
   createRequestHandler as createReactRouterRequestHandler,
-  ServerBuild,
-  UNSAFE_MiddlewareEnabled as MiddlewareEnabled,
-  unstable_InitialContext,
+  type ServerBuild,
+  type UNSAFE_MiddlewareEnabled as MiddlewareEnabled,
+  type unstable_InitialContext,
 } from "react-router";
 
-import { ReactRouterAdapter } from "./adapters";
-import {
-  type ALBEvent,
+import type { ReactRouterAdapter } from "./adapters";
+import type {
+  ALBEvent,
   ALBHandler,
   APIGatewayProxyEvent,
   APIGatewayProxyEventV2,
@@ -21,7 +21,7 @@ import { apiGatewayV2Adapter } from "./adapters/api-gateway-v2";
 import { apiGatewayV1Adapter } from "./adapters/api-gateway-v1";
 import { applicationLoadBalancerAdapter } from "./adapters/application-load-balancer";
 import { functionUrlStreamingAdapter } from "./adapters/function-url-streaming";
-import { StreamifyHandler } from "aws-lambda/handler";
+import type { StreamifyHandler } from "aws-lambda/handler";
 
 type MaybePromise<T> = T | Promise<T>;
 

@@ -1,9 +1,10 @@
 {
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "test/**/*.ts"],
   "exclude": ["dist", "node_modules"],
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "target": "ES2022",
+    "module": "ES2022",
     "moduleResolution": "Bundler",
     "allowSyntheticDefaultImports": true,
     "strict": true,
@@ -11,6 +12,7 @@
     "emitDeclarationOnly": true,
     "rootDir": ".",
     "outDir": "./lib",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "types": ["node", "vitest/globals"]
   }
 }

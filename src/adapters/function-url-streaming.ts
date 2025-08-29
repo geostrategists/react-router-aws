@@ -1,8 +1,8 @@
-import { ReactRouterAdapter } from "./index";
+import type { ReactRouterAdapter } from "./index";
 import type { LambdaFunctionURLEvent } from "aws-lambda";
 import { createReactRouterRequestAPIGateywayV2, extractAPIGatewayV2ResponseMetadata } from "./api-gateway-v2";
 import { writeReadableStreamToWritable } from "@react-router/node";
-import { StreamifyHandler } from "aws-lambda/handler";
+import type { StreamifyHandler } from "aws-lambda/handler";
 
 const emptyStream = () =>
   new ReadableStream({

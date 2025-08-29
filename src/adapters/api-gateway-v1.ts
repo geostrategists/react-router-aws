@@ -5,7 +5,7 @@ import { URLSearchParams } from "url";
 
 import { isBinaryType } from "../binaryTypes";
 
-import { ReactRouterAdapter } from "./index";
+import type { ReactRouterAdapter } from "./index";
 
 function createReactRouterRequestAPIGatewayV1(event: APIGatewayProxyEvent): Request {
   const host = event.headers["x-forwarded-host"] || event.headers.Host;
