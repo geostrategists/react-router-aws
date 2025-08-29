@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { htmlResponse, invokeHandlerWithRRMock, redirectResponse } from "./utils";
-import { LambdaFunctionURLEvent } from "aws-lambda";
+import type { LambdaFunctionURLEvent } from "aws-lambda";
 
-export function lambdaFunctionUrlEvent(
+function lambdaFunctionUrlEvent(
   path: string,
   method = "GET",
   headers: Record<string, string> = {},
@@ -34,9 +34,9 @@ describe("Function URL request handling", () => {
         return new Response("ok");
       },
       lambdaFunctionUrlEvent("/test", "POST", { "x-custom-header": "a" }),
-    )
-  })
-})
+    );
+  });
+});
 
 describe("Function URL buffered response handling", () => {
   it("html without cookie", async () => {

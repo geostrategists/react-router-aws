@@ -1,10 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-"use strict";
-
 // based on https://github.com/astuyve/lambda-stream/blob/main/src/index.ts
 // which is MIT licensed according to https://www.npmjs.com/package/lambda-stream
 
-import { StreamifyHandler } from "aws-lambda";
+import type { StreamifyHandler } from "aws-lambda";
 import { ResponseStream } from "./ResponseStream";
 import { HttpResponseStream } from "./HttpResponseStream";
 
@@ -13,7 +10,7 @@ export function streamifyResponse<TEvent = any, TResult = void>(
 ): StreamifyHandler<TEvent, TResult> {
   // Check for global awslambda
   return new Proxy(handler, {
-    apply: async function (target, _, argList: Parameters<StreamifyHandler<TEvent, TResult>>) {
+    apply: async (target, _, argList: Parameters<StreamifyHandler<TEvent, TResult>>) => {
       const responseStream: ResponseStream = patchArgs(argList);
       await target(...argList);
 

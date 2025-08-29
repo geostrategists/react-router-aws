@@ -1,12 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { htmlResponse, redirectResponse, invokeHandlerWithRRMock } from "./utils";
-import { APIGatewayProxyEvent } from "aws-lambda";
+import type { APIGatewayProxyEvent } from "aws-lambda";
 
-export function apiGatewayV1Event(
-  path: string,
-  method = "GET",
-  headers: Record<string, string> = {},
-): APIGatewayProxyEvent {
+function apiGatewayV1Event(path: string, method = "GET", headers: Record<string, string> = {}): APIGatewayProxyEvent {
   return {
     requestContext: { httpMethod: method } as APIGatewayProxyEvent["requestContext"],
     path,

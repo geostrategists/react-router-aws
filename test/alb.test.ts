@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { htmlResponse, redirectResponse, invokeHandlerWithRRMock } from "./utils";
-import { ALBEvent } from "aws-lambda";
+import type { ALBEvent } from "aws-lambda";
 
 function albEvent(path: string, method = "GET", headers: Record<string, string> = {}): ALBEvent {
   return {

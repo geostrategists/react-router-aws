@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Stream } from "stream";
+import { Stream } from "node:stream";
 
 // based on https://github.com/astuyve/lambda-stream/blob/main/src/ResponseStream.ts
 // which is MIT licensed according to https://www.npmjs.com/package/lambda-stream

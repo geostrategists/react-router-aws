@@ -8,7 +8,7 @@ import { readableStreamToString } from "@react-router/node";
 
 import { isBinaryType } from "../binaryTypes";
 
-import { ReactRouterAdapter } from "./index";
+import type { ReactRouterAdapter } from "./index";
 
 export function createReactRouterRequestAPIGateywayV2(event: APIGatewayProxyEventV2): Request {
   const host = event.headers["x-forwarded-host"] || event.headers.host;

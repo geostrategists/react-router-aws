@@ -5,7 +5,7 @@ import { URLSearchParams } from "url";
 
 import { isBinaryType } from "../binaryTypes";
 
-import { ReactRouterAdapter } from "./index";
+import type { ReactRouterAdapter } from "./index";
 
 function createReactRouterRequestALB(event: ALBEvent): Request {
   const headers = event?.headers || {};

@@ -1,9 +1,0 @@
-node_modules
-
-*.js
-*.d.ts
-*.iml
-.*
-dist
-output
-
