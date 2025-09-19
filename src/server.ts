@@ -31,9 +31,7 @@ type MaybePromise<T> = T | Promise<T>;
  * You can think of this as an escape hatch that allows you to pass
  * environment/platform-specific values through to your loader/action.
  */
-export type GetLoadContextFunction<E> = (
-  event: E,
-) => MaybePromise<AppLoadContext | RouterContextProvider>;
+export type GetLoadContextFunction<E> = (event: E) => MaybePromise<AppLoadContext | RouterContextProvider>;
 
 export type CreateRequestHandlerArgs<T> = {
   build: ServerBuild;
