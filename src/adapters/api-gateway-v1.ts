@@ -1,7 +1,7 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyEventHeaders, APIGatewayProxyResult } from "aws-lambda";
 
 import { readableStreamToString } from "@react-router/node";
-import { URLSearchParams } from "url";
+import { URLSearchParams } from "node:url";
 
 import { isBinaryType } from "../binaryTypes";
 

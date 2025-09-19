@@ -2,7 +2,7 @@ import {
   type AppLoadContext,
   createRequestHandler as createReactRouterRequestHandler,
   type ServerBuild,
-  RouterContextProvider,
+  type RouterContextProvider,
 } from "react-router";
 
 import type { ReactRouterAdapter } from "./adapters";
@@ -128,7 +128,7 @@ function createRequestHandlerForAdapter<E, Ret, Res, H>(
 
     const loadContext = await getLoadContext?.(event);
 
-    const response = await handleRequest(request, loadContext as any);
+    const response = await handleRequest(request, loadContext as unknown as AppLoadContext | undefined);
 
     return await awsAdapter.sendReactRouterResponse(response, res);
   });
