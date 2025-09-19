@@ -2,8 +2,7 @@ import {
   type AppLoadContext,
   createRequestHandler as createReactRouterRequestHandler,
   type ServerBuild,
-  type UNSAFE_MiddlewareEnabled as MiddlewareEnabled,
-  type unstable_InitialContext,
+  RouterContextProvider,
 } from "react-router";
 
 import type { ReactRouterAdapter } from "./adapters";
@@ -34,7 +33,7 @@ type MaybePromise<T> = T | Promise<T>;
  */
 export type GetLoadContextFunction<E> = (
   event: E,
-) => MiddlewareEnabled extends true ? MaybePromise<unstable_InitialContext> : MaybePromise<AppLoadContext>;
+) => MaybePromise<AppLoadContext | RouterContextProvider>;
 
 export type CreateRequestHandlerArgs<T> = {
   build: ServerBuild;
@@ -129,7 +128,7 @@ function createRequestHandlerForAdapter<E, Ret, Res, H>(
 
     const loadContext = await getLoadContext?.(event);
 
-    const response = await handleRequest(request, loadContext);
+    const response = await handleRequest(request, loadContext as any);
 
     return await awsAdapter.sendReactRouterResponse(response, res);
   });
