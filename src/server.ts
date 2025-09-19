@@ -1,9 +1,9 @@
 import {
   type AppLoadContext,
   createRequestHandler as createReactRouterRequestHandler,
+  type RouterContextProvider,
   type ServerBuild,
   type UNSAFE_MiddlewareEnabled as MiddlewareEnabled,
-  type unstable_InitialContext,
 } from "react-router";
 
 import type { ReactRouterAdapter } from "./adapters";
@@ -34,7 +34,7 @@ type MaybePromise<T> = T | Promise<T>;
  */
 export type GetLoadContextFunction<E> = (
   event: E,
-) => MiddlewareEnabled extends true ? MaybePromise<unstable_InitialContext> : MaybePromise<AppLoadContext>;
+) => MiddlewareEnabled extends true ? MaybePromise<RouterContextProvider> : MaybePromise<AppLoadContext>;
 
 export type CreateRequestHandlerArgs<T> = {
   build: ServerBuild;
