@@ -23,7 +23,7 @@ export function createReactRouterRequestAPIGateywayV2(event: APIGatewayProxyEven
 
   return new Request(url.href, {
     method: event.requestContext.http.method,
-    headers: createReactRouterHeadersAPIGatewayV2(event.headers, event.cookies),
+    headers: createReactRouterHeadersAPIGatewayV2(event.headers, event.cookies, url.host),
     signal: controller.signal,
     body:
       event.body && event.isBase64Encoded
@@ -36,7 +36,8 @@ export function createReactRouterRequestAPIGateywayV2(event: APIGatewayProxyEven
 
 function createReactRouterHeadersAPIGatewayV2(
   requestHeaders: APIGatewayProxyEventHeaders,
-  requestCookies?: string[],
+  requestCookies: string[] | undefined,
+  urlHost: string,
 ): Headers {
   const headers = new Headers();
 
@@ -48,6 +49,16 @@ function createReactRouterHeadersAPIGatewayV2(
 
   if (requestCookies) {
     headers.append("Cookie", requestCookies.join("; "));
+  }
+
+  // Ensure x-forwarded-host is set to the host used in the URL.
+  // This is critical for react-router's CSRF protection (added in v7.12.0) which
+  // compares the origin header with x-forwarded-host/host headers.
+  // When behind CloudFront with ALL_VIEWER_EXCEPT_HOST_HEADER policy, the host
+  // header becomes the Lambda Function URL domain, but origin still contains
+  // the original domain. Setting x-forwarded-host ensures the CSRF check passes.
+  if (!headers.has("x-forwarded-host")) {
+    headers.set("x-forwarded-host", urlHost);
   }
 
   return headers;

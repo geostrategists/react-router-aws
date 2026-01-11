@@ -24,7 +24,7 @@ function createReactRouterRequestALB(event: ALBEvent): Request {
 
   return new Request(url.href, {
     method: event.httpMethod,
-    headers: createReactRouterHeadersALB(headers),
+    headers: createReactRouterHeadersALB(headers, url.host),
     signal: controller.signal,
     body:
       event.body && event.isBase64Encoded
@@ -35,13 +35,22 @@ function createReactRouterRequestALB(event: ALBEvent): Request {
   });
 }
 
-function createReactRouterHeadersALB(requestHeaders: ALBEventHeaders): Headers {
+function createReactRouterHeadersALB(requestHeaders: ALBEventHeaders, urlHost: string): Headers {
   const headers = new Headers();
 
   for (const [header, value] of Object.entries(requestHeaders)) {
     if (value) {
       headers.append(header, value);
     }
+  }
+
+  // Ensure x-forwarded-host is set to the host used in the URL.
+  // This is critical for react-router's CSRF protection (added in v7.12.0) which
+  // compares the origin header with x-forwarded-host/host headers.
+  // When behind a proxy that replaces the host header, setting x-forwarded-host
+  // ensures the CSRF check passes.
+  if (!headers.has("x-forwarded-host")) {
+    headers.set("x-forwarded-host", urlHost);
   }
 
   return headers;
