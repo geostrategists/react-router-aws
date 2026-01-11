@@ -33,10 +33,7 @@ function createReactRouterRequestAPIGatewayV1(event: APIGatewayProxyEvent): Requ
   });
 }
 
-function createReactRouterHeadersAPIGatewayV1(
-  requestHeaders: APIGatewayProxyEventHeaders,
-  urlHost: string,
-): Headers {
+function createReactRouterHeadersAPIGatewayV1(requestHeaders: APIGatewayProxyEventHeaders, urlHost: string): Headers {
   const headers = new Headers();
 
   for (const [header, value] of Object.entries(requestHeaders)) {
