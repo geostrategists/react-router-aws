@@ -8,9 +8,10 @@ function apiGatewayV2Event(
   method = "GET",
   headers: Record<string, string> = {},
   cookies?: string[],
+  domainName?: string,
 ): APIGatewayProxyEventV2 {
   return {
-    requestContext: { http: { method } } as APIGatewayProxyEventV2["requestContext"],
+    requestContext: { http: { method }, domainName } as APIGatewayProxyEventV2["requestContext"],
     rawPath: path,
     rawQueryString: "",
     headers: {
@@ -35,6 +36,64 @@ describe("API Gateway v2 request handling", () => {
         return new Response("ok");
       },
       apiGatewayV2Event("/test", "POST", { "x-custom-header": "a" }),
+    );
+  });
+
+  it("uses x-forwarded-host by default", async () => {
+    await invokeHandlerWithRRMock(
+      "createAPIGatewayV2RequestHandler",
+      (request) => {
+        expect(request.url).toBe("https://forwarded.example.com/test");
+        return new Response("ok");
+      },
+      apiGatewayV2Event(
+        "/test",
+        "GET",
+        { "x-forwarded-host": "forwarded.example.com" },
+        undefined,
+        "context.example.com",
+      ),
+    );
+  });
+
+  it("uses the request context domain name when enabled", async () => {
+    await invokeHandlerWithRRMock(
+      "createAPIGatewayV2RequestHandler",
+      (request) => {
+        expect(request.url).toBe("https://context.example.com/test");
+        return new Response("ok");
+      },
+      apiGatewayV2Event(
+        "/test",
+        "GET",
+        { "x-forwarded-host": "forwarded.example.com" },
+        undefined,
+        "context.example.com",
+      ),
+      { useRequestContextDomainName: true },
+    );
+  });
+
+  it("falls back to the host header when the request context domain name is missing", async () => {
+    await invokeHandlerWithRRMock(
+      "createAPIGatewayV2RequestHandler",
+      (request) => {
+        expect(request.url).toBe("https://example.com/test");
+        return new Response("ok");
+      },
+      apiGatewayV2Event("/test", "GET", { "x-forwarded-host": "forwarded.example.com" }),
+      { useRequestContextDomainName: true },
+    );
+  });
+
+  it("strips invalid characters from the host", async () => {
+    await invokeHandlerWithRRMock(
+      "createAPIGatewayV2RequestHandler",
+      (request) => {
+        expect(request.url).toBe("https://example.com:4444/test");
+        return new Response("ok");
+      },
+      apiGatewayV2Event("/test", "GET", { "x-forwarded-host": "example.com:4444/invalid@chars" }),
     );
   });
 });

@@ -60,6 +60,39 @@ export const handler = createAPIGatewayV2RequestHandler({
 > It does not allow tree-shaking and will include all gateway adapters in your bundle.  
 > For optimal bundle size, always use the method specific to your gateway:
 
+### Request host & CSRF (`useRequestContextDomainName`)
+
+React Router derives the host used for its built-in cross-origin (CSRF) check on
+action requests from the constructed request URL (`new URL(request.url).host`),
+so it is important that the adapter builds that host from a trustworthy source.
+
+By default the adapters build the host from the client-supplied
+`x-forwarded-host` header (falling back to the `host` header). Set
+`useRequestContextDomainName: true` to instead use the AWS-provided
+`event.requestContext.domainName`, which cannot be influenced by the client:
+
+```javascript
+// lambda-handler.ts
+import * as build from "virtual:react-router/server-build";
+import { createAPIGatewayV2RequestHandler } from "@geostrategists/react-router-aws";
+
+export const handler = createAPIGatewayV2RequestHandler({
+  build,
+  useRequestContextDomainName: true,
+});
+```
+
+This option is supported by the API Gateway v1, API Gateway v2 and Lambda
+Function URL (buffered and streaming) handlers. It has no effect for the ALB
+handler, whose events carry no request-context domain name.
+
+> [!NOTE]
+> To align with the upstream `@react-router/architect` adapter, this option
+> defaults to `false` for now but **will default to `true` in the next major
+> version**, after which the flag will be removed and the request-context domain
+> name will always be used. Set it explicitly if you rely on the current
+> `x-forwarded-host` behavior.
+
 ### Streaming support for Lambda Function URLs
 
 React Router and React allow you to stream responses from the server to the client, reducing the TTFB (time to first byte)

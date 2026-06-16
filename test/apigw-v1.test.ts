@@ -3,9 +3,14 @@ import { describe, it, expect } from "vitest";
 
 import { htmlResponse, redirectResponse, invokeHandlerWithRRMock } from "./utils";
 
-function apiGatewayV1Event(path: string, method = "GET", headers: Record<string, string> = {}): APIGatewayProxyEvent {
+function apiGatewayV1Event(
+  path: string,
+  method = "GET",
+  headers: Record<string, string> = {},
+  domainName?: string,
+): APIGatewayProxyEvent {
   return {
-    requestContext: { httpMethod: method } as APIGatewayProxyEvent["requestContext"],
+    requestContext: { httpMethod: method, domainName } as APIGatewayProxyEvent["requestContext"],
     path,
     queryStringParameters: {},
     headers: {
@@ -29,6 +34,40 @@ describe("API Gateway v1 request handling", () => {
         return new Response("ok");
       },
       apiGatewayV1Event("/test", "POST", { "x-custom-header": "a" }),
+    );
+  });
+
+  it("uses x-forwarded-host by default", async () => {
+    await invokeHandlerWithRRMock(
+      "createAPIGatewayV1RequestHandler",
+      (request) => {
+        expect(request.url).toBe("https://forwarded.example.com/test");
+        return new Response("ok");
+      },
+      apiGatewayV1Event("/test", "GET", { "x-forwarded-host": "forwarded.example.com" }, "context.example.com"),
+    );
+  });
+
+  it("uses the request context domain name when enabled", async () => {
+    await invokeHandlerWithRRMock(
+      "createAPIGatewayV1RequestHandler",
+      (request) => {
+        expect(request.url).toBe("https://context.example.com/test");
+        return new Response("ok");
+      },
+      apiGatewayV1Event("/test", "GET", { "x-forwarded-host": "forwarded.example.com" }, "context.example.com"),
+      { useRequestContextDomainName: true },
+    );
+  });
+
+  it("strips invalid characters from the host", async () => {
+    await invokeHandlerWithRRMock(
+      "createAPIGatewayV1RequestHandler",
+      (request) => {
+        expect(request.url).toBe("https://example.com:4444/test");
+        return new Response("ok");
+      },
+      apiGatewayV1Event("/test", "GET", { "x-forwarded-host": "example.com:4444/invalid@chars" }),
     );
   });
 });

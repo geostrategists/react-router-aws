@@ -4,10 +4,13 @@ import { URLSearchParams } from "url";
 
 import { isBinaryType } from "../binaryTypes";
 import type { ReactRouterAdapter } from "./index";
+import { resolveHost } from "./host";
 
+// ALB events carry no trusted request-context domain name, so
+// `useRequestContextDomainName` does not apply here and is ignored.
 function createReactRouterRequestALB(event: ALBEvent): Request {
   const headers = event?.headers || {};
-  const host = headers["x-forwarded-host"] || headers.Host;
+  const host = resolveHost(headers["x-forwarded-host"] || headers.Host);
   const scheme = headers["x-forwarded-proto"] || "http";
 
   const rawQueryString = new URLSearchParams(event.queryStringParameters as Record<string, string>).toString();

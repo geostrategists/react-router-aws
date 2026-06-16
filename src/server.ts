@@ -40,6 +40,27 @@ export type CreateRequestHandlerArgs<T> = {
   build: ServerBuild;
   getLoadContext?: GetLoadContextFunction<T>;
   mode?: string;
+  /**
+   * Derive the request URL host from the API Gateway request context
+   * (`event.requestContext.domainName`) instead of the client-supplied
+   * `x-forwarded-host` header (falling back to the `host` header in both cases).
+   *
+   * The request URL host is what React Router uses for its built-in cross-origin
+   * (CSRF) check on action requests, so preferring the AWS-provided domain name
+   * avoids trusting a client-influenced header.
+   *
+   * Has no effect for the ALB adapter, whose events carry no request-context
+   * domain name.
+   *
+   * @default false
+   *
+   * @remarks
+   * This mirrors the `@react-router/architect` adapter. To align with React
+   * Router, this option will default to `true` in the next major version, after
+   * which the flag will be removed and the request-context domain name will
+   * always be used.
+   */
+  useRequestContextDomainName?: boolean;
 };
 
 /**
@@ -111,7 +132,12 @@ export function createFunctionURLStreamingRequestHandler(
 
 function createRequestHandlerForAdapter<E, Ret, Res, H>(
   awsAdapter: ReactRouterAdapter<E, Ret, Res, H>,
-  { build, getLoadContext, mode = process.env.NODE_ENV }: CreateRequestHandlerArgs<E>,
+  {
+    build,
+    getLoadContext,
+    mode = process.env.NODE_ENV,
+    useRequestContextDomainName = false,
+  }: CreateRequestHandlerArgs<E>,
 ) {
   const handleRequest = createReactRouterRequestHandler(build, mode);
 
@@ -119,7 +145,7 @@ function createRequestHandlerForAdapter<E, Ret, Res, H>(
     let request: Request;
 
     try {
-      request = awsAdapter.createReactRouterRequest(event);
+      request = awsAdapter.createReactRouterRequest(event, useRequestContextDomainName);
     } catch (e: unknown) {
       return await awsAdapter.sendReactRouterResponse(
         new Response(`Bad Request: ${e instanceof Error ? e.message : e}`, { status: 400 }),
