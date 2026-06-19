@@ -95,12 +95,17 @@ behavior. It is supported by all handlers (API Gateway v1, API Gateway v2, Lambd
 Function URL buffered & streaming, and ALB). For example, to prefer the
 API Gateway request-context domain name: `getHost: (event) => event.requestContext.domainName`.
 
-> [!NOTE]
-> The default currently uses the `x-forwarded-host` header. To align with the
-> upstream `@react-router/architect` adapter, the default **will change to the
-> API Gateway request-context domain name (`event.requestContext.domainName`) in
-> the next major version**. Setups where that host is not the browser-facing host
-> (e.g. Function URLs behind CloudFront) should set `getHost` explicitly.
+> [!IMPORTANT]
+> The default currently uses the `x-forwarded-host` header, which is
+> **client-controlled** and can be spoofed. Because that host drives React
+> Router's CSRF check, trusting it should be a deliberate choice. To make the
+> safe option the default (and to align with the upstream
+> `@react-router/architect` adapter), the default **will change to the
+> AWS-provided, non-spoofable request-context domain name
+> (`event.requestContext.domainName`) in the next major version**. After that,
+> relying on `x-forwarded-host` (or any other forwarded header) becomes an
+> explicit opt-in via `getHost`. Setups where the request-context host is not the
+> browser-facing host (e.g. Function URLs behind CloudFront) must set `getHost`.
 
 ### Streaming support for Lambda Function URLs
 

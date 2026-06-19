@@ -64,11 +64,15 @@ export type CreateRequestHandlerArgs<T> = {
    * ```
    *
    * @remarks
-   * The default currently uses the `x-forwarded-host` header. To align with the
-   * upstream `@react-router/architect` adapter, the default will change to the
-   * API Gateway request context domain name (`event.requestContext.domainName`)
-   * in the next major version. Setups where that host is not the browser-facing
-   * host (e.g. Function URLs behind CloudFront) should set `getHost` explicitly.
+   * The default currently uses the `x-forwarded-host` header, which is
+   * client-controlled and can be spoofed. Because that host drives the CSRF
+   * check, trusting it should be deliberate: the default will change to the
+   * AWS-provided, non-spoofable request-context domain name
+   * (`event.requestContext.domainName`) in the next major version (aligning with
+   * the upstream `@react-router/architect` adapter), after which relying on a
+   * forwarded header becomes an explicit opt-in via `getHost`. Setups where the
+   * request-context host is not the browser-facing host (e.g. Function URLs
+   * behind CloudFront) must set `getHost`.
    */
   getHost?: GetHostFunction<T>;
 };
