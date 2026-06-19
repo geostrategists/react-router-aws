@@ -1,19 +1,28 @@
 # cf https://github.com/marketplace/actions/release-drafter
 name-template: 'v$RESOLVED_VERSION 🌈'
 tag-template: 'v$RESOLVED_VERSION'
-version-resolver:
-  major:
-    labels:
-      - major
-  minor:
-    labels:
-      - minor
-  patch:
-    labels:
-      - patch
-  default: patch
-exclude-labels:
-  - ignore-for-release
+categories:
+  - type: version-resolver
+    semver-increment: major
+    when:
+      labels:
+        - major
+  - type: version-resolver
+    semver-increment: minor
+    when:
+      labels:
+        - minor
+  - type: version-resolver
+    semver-increment: patch
+    when:
+      labels:
+        - patch
+  - type: version-resolver
+    semver-increment: patch
+  - type: pre-exclude
+    when:
+      labels:
+        - ignore-for-release
 autolabeler:
   - label: major
     title:
