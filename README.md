@@ -82,11 +82,14 @@ yourself, typically with a CloudFront Function on the viewer request that copies
 it into a header, then read that header via `getHost`:
 
 ```javascript
-// CloudFront Function (viewer request): copy the viewer host into a custom header
+// CloudFront Function (viewer request): copy the viewer host into a custom header.
+// Always overwrite (or delete) it so a client can't spoof x-viewer-host.
 function handler(event) {
   var host = event.request.headers.host;
   if (host) {
     event.request.headers["x-viewer-host"] = { value: host.value };
+  } else {
+    delete event.request.headers["x-viewer-host"];
   }
   return event.request;
 }
