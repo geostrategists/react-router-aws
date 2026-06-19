@@ -19,8 +19,10 @@ categories:
         - patch
   - type: version-resolver
     semver-increment: patch
-exclude-labels:
-  - ignore-for-release
+  - type: pre-exclude
+    when:
+      labels:
+        - ignore-for-release
 autolabeler:
   - label: major
     title:
