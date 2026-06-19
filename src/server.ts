@@ -17,7 +17,7 @@ import {
   type UNSAFE_MiddlewareEnabled as MiddlewareEnabled,
 } from "react-router";
 
-import type { ReactRouterAdapter } from "./adapters";
+import type { GetHostFunction, ReactRouterAdapter } from "./adapters";
 import { apiGatewayV1Adapter } from "./adapters/api-gateway-v1";
 import { apiGatewayV2Adapter } from "./adapters/api-gateway-v2";
 import { applicationLoadBalancerAdapter } from "./adapters/application-load-balancer";
@@ -41,26 +41,36 @@ export type CreateRequestHandlerArgs<T> = {
   getLoadContext?: GetLoadContextFunction<T>;
   mode?: string;
   /**
-   * Derive the request URL host from the API Gateway request context
-   * (`event.requestContext.domainName`) instead of the client-supplied
-   * `x-forwarded-host` header (falling back to the `host` header in both cases).
+   * Override how the host for the request URL is derived from the Lambda event.
    *
-   * The request URL host is what React Router uses for its built-in cross-origin
-   * (CSRF) check on action requests, so preferring the AWS-provided domain name
-   * avoids trusting a client-influenced header.
+   * React Router uses the request URL host (`new URL(request.url).host`) for its
+   * built-in cross-origin (CSRF) check on action requests, comparing it against
+   * the incoming `Origin` header. The returned value is sanitized (invalid
+   * characters stripped, port validated) before use.
    *
-   * Has no effect for the ALB adapter, whose events carry no request-context
-   * domain name.
+   * Return `undefined`/`null` to fall back to the default: the
+   * `x-forwarded-host` header (falling back to the `host`/`Host` header).
    *
-   * @default false
+   * Use this when the default forwarded host is not the host the browser sees.
+   * For example, a Lambda Function URL behind CloudFront cannot use its
+   * request-context domain name (always the internal `*.lambda-url` host) — the
+   * trusted viewer host is forwarded in a header such as `cloudfront-viewer-host`:
+   *
+   * ```ts
+   * createFunctionURLRequestHandler({
+   *   build,
+   *   getHost: (event) => event.headers["cloudfront-viewer-host"],
+   * });
+   * ```
    *
    * @remarks
-   * This mirrors the `@react-router/architect` adapter. To align with React
-   * Router, this option will default to `true` in the next major version, after
-   * which the flag will be removed and the request-context domain name will
-   * always be used.
+   * The default currently uses the `x-forwarded-host` header. To align with the
+   * upstream `@react-router/architect` adapter, the default will change to the
+   * API Gateway request context domain name (`event.requestContext.domainName`)
+   * in the next major version. Setups where that host is not the browser-facing
+   * host (e.g. Function URLs behind CloudFront) should set `getHost` explicitly.
    */
-  useRequestContextDomainName?: boolean;
+  getHost?: GetHostFunction<T>;
 };
 
 /**
@@ -132,12 +142,7 @@ export function createFunctionURLStreamingRequestHandler(
 
 function createRequestHandlerForAdapter<E, Ret, Res, H>(
   awsAdapter: ReactRouterAdapter<E, Ret, Res, H>,
-  {
-    build,
-    getLoadContext,
-    mode = process.env.NODE_ENV,
-    useRequestContextDomainName = false,
-  }: CreateRequestHandlerArgs<E>,
+  { build, getLoadContext, mode = process.env.NODE_ENV, getHost }: CreateRequestHandlerArgs<E>,
 ) {
   const handleRequest = createReactRouterRequestHandler(build, mode);
 
@@ -145,7 +150,7 @@ function createRequestHandlerForAdapter<E, Ret, Res, H>(
     let request: Request;
 
     try {
-      request = awsAdapter.createReactRouterRequest(event, useRequestContextDomainName);
+      request = awsAdapter.createReactRouterRequest(event, getHost);
     } catch (e: unknown) {
       return await awsAdapter.sendReactRouterResponse(
         new Response(`Bad Request: ${e instanceof Error ? e.message : e}`, { status: 400 }),

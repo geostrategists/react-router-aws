@@ -48,7 +48,7 @@ describe("API Gateway v1 request handling", () => {
     );
   });
 
-  it("uses the request context domain name when enabled", async () => {
+  it("uses getHost when provided", async () => {
     await invokeHandlerWithRRMock(
       "createAPIGatewayV1RequestHandler",
       (request) => {
@@ -56,7 +56,19 @@ describe("API Gateway v1 request handling", () => {
         return new Response("ok");
       },
       apiGatewayV1Event("/test", "GET", { "x-forwarded-host": "forwarded.example.com" }, "context.example.com"),
-      { useRequestContextDomainName: true },
+      { getHost: (event) => event.requestContext.domainName },
+    );
+  });
+
+  it("falls back to x-forwarded-host when getHost returns undefined", async () => {
+    await invokeHandlerWithRRMock(
+      "createAPIGatewayV1RequestHandler",
+      (request) => {
+        expect(request.url).toBe("https://forwarded.example.com/test");
+        return new Response("ok");
+      },
+      apiGatewayV1Event("/test", "GET", { "x-forwarded-host": "forwarded.example.com" }, "context.example.com"),
+      { getHost: () => undefined },
     );
   });
 

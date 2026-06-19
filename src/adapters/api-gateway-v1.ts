@@ -4,15 +4,13 @@ import { URLSearchParams } from "url";
 
 import { isBinaryType } from "../binaryTypes";
 import { resolveHost } from "./host";
-import type { ReactRouterAdapter } from "./index";
+import type { GetHostFunction, ReactRouterAdapter } from "./index";
 
 function createReactRouterRequestAPIGatewayV1(
   event: APIGatewayProxyEvent,
-  useRequestContextDomainName = false,
+  getHost?: GetHostFunction<APIGatewayProxyEvent>,
 ): Request {
-  const rawHost = useRequestContextDomainName
-    ? event.requestContext.domainName || event.headers.Host
-    : event.headers["x-forwarded-host"] || event.headers.Host;
+  const rawHost = getHost?.(event) ?? (event.headers["x-forwarded-host"] || event.headers.Host);
   const host = resolveHost(rawHost);
   const scheme = event.headers["x-forwarded-proto"] || "http";
 

@@ -7,15 +7,13 @@ import type {
 
 import { isBinaryType } from "../binaryTypes";
 import { resolveHost } from "./host";
-import type { ReactRouterAdapter } from "./index";
+import type { GetHostFunction, ReactRouterAdapter } from "./index";
 
 export function createReactRouterRequestAPIGateywayV2(
   event: APIGatewayProxyEventV2,
-  useRequestContextDomainName = false,
+  getHost?: GetHostFunction<APIGatewayProxyEventV2>,
 ): Request {
-  const rawHost = useRequestContextDomainName
-    ? event.requestContext.domainName || event.headers.host
-    : event.headers["x-forwarded-host"] || event.headers.host;
+  const rawHost = getHost?.(event) ?? (event.headers["x-forwarded-host"] || event.headers.host);
   const host = resolveHost(rawHost);
   const search = event.rawQueryString.length ? `?${event.rawQueryString}` : "";
   const scheme = event.headers["x-forwarded-proto"] || "http";

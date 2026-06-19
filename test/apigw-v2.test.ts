@@ -56,7 +56,7 @@ describe("API Gateway v2 request handling", () => {
     );
   });
 
-  it("uses the request context domain name when enabled", async () => {
+  it("uses getHost when provided (request context domain name)", async () => {
     await invokeHandlerWithRRMock(
       "createAPIGatewayV2RequestHandler",
       (request) => {
@@ -70,19 +70,34 @@ describe("API Gateway v2 request handling", () => {
         undefined,
         "context.example.com",
       ),
-      { useRequestContextDomainName: true },
+      { getHost: (event) => event.requestContext.domainName },
     );
   });
 
-  it("falls back to the host header when the request context domain name is missing", async () => {
+  it("uses getHost when provided (custom forwarded header)", async () => {
     await invokeHandlerWithRRMock(
       "createAPIGatewayV2RequestHandler",
       (request) => {
-        expect(request.url).toBe("https://example.com/test");
+        expect(request.url).toBe("https://viewer.example.com/test");
+        return new Response("ok");
+      },
+      apiGatewayV2Event("/test", "GET", {
+        "x-forwarded-host": "forwarded.example.com",
+        "cloudfront-viewer-host": "viewer.example.com",
+      }),
+      { getHost: (event) => event.headers["cloudfront-viewer-host"] },
+    );
+  });
+
+  it("falls back to x-forwarded-host when getHost returns undefined", async () => {
+    await invokeHandlerWithRRMock(
+      "createAPIGatewayV2RequestHandler",
+      (request) => {
+        expect(request.url).toBe("https://forwarded.example.com/test");
         return new Response("ok");
       },
       apiGatewayV2Event("/test", "GET", { "x-forwarded-host": "forwarded.example.com" }),
-      { useRequestContextDomainName: true },
+      { getHost: () => undefined },
     );
   });
 

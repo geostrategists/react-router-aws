@@ -43,6 +43,21 @@ describe("ALB request handling", () => {
       albEvent("/test", "GET", { "x-forwarded-host": "example.com:4444/invalid@chars" }),
     );
   });
+
+  it("uses getHost when provided", async () => {
+    await invokeHandlerWithRRMock(
+      "createALBRequestHandler",
+      async (request: Request) => {
+        expect(request.url).toBe("https://viewer.example.com/test");
+        return new Response("ok");
+      },
+      albEvent("/test", "GET", {
+        "x-forwarded-host": "forwarded.example.com",
+        "x-trusted-host": "viewer.example.com",
+      }),
+      { getHost: (event) => event.headers?.["x-trusted-host"] },
+    );
+  });
 });
 
 describe("ALB response handling", () => {
