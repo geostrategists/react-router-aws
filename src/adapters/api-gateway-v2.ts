@@ -6,10 +6,15 @@ import type {
 } from "aws-lambda";
 
 import { isBinaryType } from "../binaryTypes";
-import type { ReactRouterAdapter } from "./index";
+import { resolveHost } from "./host";
+import type { GetHostFunction, ReactRouterAdapter } from "./index";
 
-export function createReactRouterRequestAPIGateywayV2(event: APIGatewayProxyEventV2): Request {
-  const host = event.headers["x-forwarded-host"] || event.headers.host;
+export function createReactRouterRequestAPIGateywayV2(
+  event: APIGatewayProxyEventV2,
+  getHost?: GetHostFunction<APIGatewayProxyEventV2>,
+): Request {
+  const rawHost = getHost?.(event) ?? (event.headers["x-forwarded-host"] || event.headers.host);
+  const host = resolveHost(rawHost);
   const search = event.rawQueryString.length ? `?${event.rawQueryString}` : "";
   const scheme = event.headers["x-forwarded-proto"] || "http";
 

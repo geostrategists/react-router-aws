@@ -32,6 +32,32 @@ describe("ALB request handling", () => {
       albEvent("/test", "POST", { "x-custom-header": "a" }),
     );
   });
+
+  it("strips invalid characters from the host", async () => {
+    await invokeHandlerWithRRMock(
+      "createALBRequestHandler",
+      async (request: Request) => {
+        expect(request.url).toBe("https://example.com:4444/test");
+        return new Response("ok");
+      },
+      albEvent("/test", "GET", { "x-forwarded-host": "example.com:4444/invalid@chars" }),
+    );
+  });
+
+  it("uses getHost when provided", async () => {
+    await invokeHandlerWithRRMock(
+      "createALBRequestHandler",
+      async (request: Request) => {
+        expect(request.url).toBe("https://viewer.example.com/test");
+        return new Response("ok");
+      },
+      albEvent("/test", "GET", {
+        "x-forwarded-host": "forwarded.example.com",
+        "x-trusted-host": "viewer.example.com",
+      }),
+      { getHost: (event) => event.headers?.["x-trusted-host"] },
+    );
+  });
 });
 
 describe("ALB response handling", () => {

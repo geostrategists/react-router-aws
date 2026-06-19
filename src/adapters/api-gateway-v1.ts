@@ -3,10 +3,15 @@ import type { APIGatewayProxyEvent, APIGatewayProxyEventHeaders, APIGatewayProxy
 import { URLSearchParams } from "url";
 
 import { isBinaryType } from "../binaryTypes";
-import type { ReactRouterAdapter } from "./index";
+import { resolveHost } from "./host";
+import type { GetHostFunction, ReactRouterAdapter } from "./index";
 
-function createReactRouterRequestAPIGatewayV1(event: APIGatewayProxyEvent): Request {
-  const host = event.headers["x-forwarded-host"] || event.headers.Host;
+function createReactRouterRequestAPIGatewayV1(
+  event: APIGatewayProxyEvent,
+  getHost?: GetHostFunction<APIGatewayProxyEvent>,
+): Request {
+  const rawHost = getHost?.(event) ?? (event.headers["x-forwarded-host"] || event.headers.Host);
+  const host = resolveHost(rawHost);
   const scheme = event.headers["x-forwarded-proto"] || "http";
 
   const rawQueryString = new URLSearchParams(event.queryStringParameters as Record<string, string>).toString();

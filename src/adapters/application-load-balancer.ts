@@ -3,11 +3,12 @@ import type { ALBEvent, ALBEventHeaders, ALBResult } from "aws-lambda";
 import { URLSearchParams } from "url";
 
 import { isBinaryType } from "../binaryTypes";
-import type { ReactRouterAdapter } from "./index";
+import { resolveHost } from "./host";
+import type { GetHostFunction, ReactRouterAdapter } from "./index";
 
-function createReactRouterRequestALB(event: ALBEvent): Request {
+function createReactRouterRequestALB(event: ALBEvent, getHost?: GetHostFunction<ALBEvent>): Request {
   const headers = event?.headers || {};
-  const host = headers["x-forwarded-host"] || headers.Host;
+  const host = resolveHost(getHost?.(event) ?? (headers["x-forwarded-host"] || headers.Host));
   const scheme = headers["x-forwarded-proto"] || "http";
 
   const rawQueryString = new URLSearchParams(event.queryStringParameters as Record<string, string>).toString();

@@ -29,21 +29,29 @@ type GatewayHandlers = Pick<
 
 type RRHandler = (request: Request) => Response | Promise<Response>;
 
+type GatewayEvent<T extends keyof GatewayHandlers> = Parameters<ReturnType<GatewayHandlers[T]>>[0];
+
+type HandlerOptions<T extends keyof GatewayHandlers> = {
+  getHost?: (event: GatewayEvent<T>) => string | null | undefined;
+};
+
 export async function createHandlerWithRRMock<T extends keyof GatewayHandlers>(
   gatewayHandler: T,
   handler: RRHandler,
+  options: HandlerOptions<T> = {},
 ): Promise<GatewayHandlers[T]> {
   setReactRouterHandler(handler);
   const handlerFactory = (await import("../src"))[gatewayHandler] as any;
-  return handlerFactory({ build: {} as unknown as ServerBuild });
+  return handlerFactory({ build: {} as unknown as ServerBuild, ...options });
 }
 
 export async function invokeHandlerWithRRMock<T extends keyof GatewayHandlers>(
   gatewayHandler: T,
   rrHandler: RRHandler,
-  event: Parameters<ReturnType<GatewayHandlers[T]>>[0],
+  event: GatewayEvent<T>,
+  options: HandlerOptions<T> = {},
 ) {
-  const handler = await createHandlerWithRRMock(gatewayHandler, rrHandler);
+  const handler = await createHandlerWithRRMock(gatewayHandler, rrHandler, options);
   return invokeHandler(handler as any, event);
 }
 

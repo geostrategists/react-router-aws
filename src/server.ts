@@ -17,7 +17,7 @@ import {
   type UNSAFE_MiddlewareEnabled as MiddlewareEnabled,
 } from "react-router";
 
-import type { ReactRouterAdapter } from "./adapters";
+import type { GetHostFunction, ReactRouterAdapter } from "./adapters";
 import { apiGatewayV1Adapter } from "./adapters/api-gateway-v1";
 import { apiGatewayV2Adapter } from "./adapters/api-gateway-v2";
 import { applicationLoadBalancerAdapter } from "./adapters/application-load-balancer";
@@ -40,6 +40,43 @@ export type CreateRequestHandlerArgs<T> = {
   build: ServerBuild;
   getLoadContext?: GetLoadContextFunction<T>;
   mode?: string;
+  /**
+   * Override how the host for the request URL is derived from the Lambda event.
+   *
+   * React Router uses the request URL host (`new URL(request.url).host`) for its
+   * built-in cross-origin (CSRF) check on action requests, comparing it against
+   * the incoming `Origin` header. The returned value is sanitized (invalid
+   * characters stripped, port validated) before use.
+   *
+   * Return `undefined`/`null` to fall back to the default: the
+   * `x-forwarded-host` header (falling back to the `host`/`Host` header).
+   *
+   * Use this when the default forwarded host is not the host the browser sees.
+   * For example, a Lambda Function URL behind CloudFront cannot use its
+   * request-context domain name (always the internal `*.lambda-url` host), and
+   * CloudFront does not forward the viewer host by default. Forward it yourself
+   * (e.g. a CloudFront Function copying the viewer `Host` into a custom header)
+   * and read that header here:
+   *
+   * ```ts
+   * createFunctionURLRequestHandler({
+   *   build,
+   *   getHost: (event) => event.headers["x-viewer-host"],
+   * });
+   * ```
+   *
+   * @remarks
+   * The default currently uses the `x-forwarded-host` header, which is
+   * client-controlled and can be spoofed. Because that host drives the CSRF
+   * check, trusting it should be deliberate: the default will change to the
+   * AWS-provided, non-spoofable request-context domain name
+   * (`event.requestContext.domainName`) in the next major version (aligning with
+   * the upstream `@react-router/architect` adapter), after which relying on a
+   * forwarded header becomes an explicit opt-in via `getHost`. Setups where the
+   * request-context host is not the browser-facing host (e.g. Function URLs
+   * behind CloudFront) must set `getHost`.
+   */
+  getHost?: GetHostFunction<T>;
 };
 
 /**
@@ -111,7 +148,7 @@ export function createFunctionURLStreamingRequestHandler(
 
 function createRequestHandlerForAdapter<E, Ret, Res, H>(
   awsAdapter: ReactRouterAdapter<E, Ret, Res, H>,
-  { build, getLoadContext, mode = process.env.NODE_ENV }: CreateRequestHandlerArgs<E>,
+  { build, getLoadContext, mode = process.env.NODE_ENV, getHost }: CreateRequestHandlerArgs<E>,
 ) {
   const handleRequest = createReactRouterRequestHandler(build, mode);
 
@@ -119,7 +156,7 @@ function createRequestHandlerForAdapter<E, Ret, Res, H>(
     let request: Request;
 
     try {
-      request = awsAdapter.createReactRouterRequest(event);
+      request = awsAdapter.createReactRouterRequest(event, getHost);
     } catch (e: unknown) {
       return await awsAdapter.sendReactRouterResponse(
         new Response(`Bad Request: ${e instanceof Error ? e.message : e}`, { status: 400 }),
