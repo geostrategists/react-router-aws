@@ -84,7 +84,10 @@ it into a header, then read that header via `getHost`:
 ```javascript
 // CloudFront Function (viewer request): copy the viewer host into a custom header
 function handler(event) {
-  event.request.headers["x-viewer-host"] = { value: event.request.headers.host.value };
+  var host = event.request.headers.host;
+  if (host) {
+    event.request.headers["x-viewer-host"] = { value: host.value };
+  }
   return event.request;
 }
 ```
