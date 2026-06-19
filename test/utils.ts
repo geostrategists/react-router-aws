@@ -1,7 +1,6 @@
-import { vi } from "vitest";
 import type { Context, Handler } from "aws-lambda";
-
 import type { ServerBuild } from "react-router";
+import { vi } from "vitest";
 
 let currentRRHandler: RRHandler | null = null;
 export function setReactRouterHandler(fn: RRHandler) {
@@ -10,7 +9,9 @@ export function setReactRouterHandler(fn: RRHandler) {
 vi.mock("react-router", () => {
   return {
     createRequestHandler: () => {
-      if (!currentRRHandler) throw new Error("React Router handler not set");
+      if (!currentRRHandler) {
+        throw new Error("React Router handler not set");
+      }
       return currentRRHandler;
     },
   };

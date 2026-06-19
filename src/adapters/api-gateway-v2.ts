@@ -1,13 +1,11 @@
+import { readableStreamToString } from "@react-router/node";
 import type {
   APIGatewayProxyEventHeaders,
   APIGatewayProxyEventV2,
   APIGatewayProxyStructuredResultV2,
 } from "aws-lambda";
 
-import { readableStreamToString } from "@react-router/node";
-
 import { isBinaryType } from "../binaryTypes";
-
 import type { ReactRouterAdapter } from "./index";
 
 export function createReactRouterRequestAPIGateywayV2(event: APIGatewayProxyEventV2): Request {

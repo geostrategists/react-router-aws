@@ -1,0 +1,27 @@
+name: Preview Release
+
+on:
+  pull_request:
+  push:
+    branches: ["main"]
+
+jobs:
+  preview:
+    name: Publish Preview
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Node and Install Dependencies
+        uses: ./.github/actions/setup-node-and-install-dependencies
+
+      - name: Build
+        run: pnpm build
+
+      - name: Publish Preview
+        run: npx pkg-pr-new publish --compact

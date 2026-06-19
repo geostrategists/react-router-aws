@@ -15,38 +15,22 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
-      - name: Cache .yarn/cache
-        uses: actions/cache@v4
-        env:
-          cache-name: yarn-cache
-        with:
-          path: .yarn/cache
-          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ env.cache-name }}
+      - name: Setup Node and Install Dependencies
+        uses: ./.github/actions/setup-node-and-install-dependencies
 
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Install dependencies
-        run: yarn install --immutable
-
-      - name: Run Lint
-        run: yarn lint
+      - name: Run oxlint
+        run: pnpm lint
 
       - name: Check code formatting
-        run: yarn format:check
+        run: pnpm format:check
 
       - name: Run Typecheck
-        run: yarn typecheck
+        run: pnpm typecheck
 
       - name: Run Tests
-        run: yarn test
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build

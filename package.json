@@ -2,110 +2,74 @@
   "name": "@geostrategists/react-router-aws",
   "version": "0.0.1",
   "description": "AWS adapter for React Router v7",
-  "license": "MIT",
+  "homepage": "https://github.com/geostrategists/react-router-aws#readme",
   "bugs": {
     "url": "https://github.com/geostrategists/react-router-aws/issues"
   },
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/geostrategists/react-router-aws.git"
   },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
   "exports": {
     ".": {
-      "node": {
-        "types": "./dist/index.d.ts",
-        "module-sync": "./dist/index.mjs",
-        "default": "./dist/index.js"
+      "types": {
+        "import": "./dist/index.d.mts",
+        "require": "./dist/index.d.cts"
       },
-      "import": {
-        "types": "./dist/index.d.mts",
-        "default": "./dist/index.mjs"
-      },
-      "default": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      }
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
     },
     "./package.json": "./package.json"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "lint": "biome lint .",
-    "format": "biome format --write .",
-    "format:check": "biome format .",
+    "build": "tsdown",
+    "clean": "rimraf dist",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "format": "oxfmt . '!**/*.yml' '!**/*.yaml'",
+    "format:check": "oxfmt --check . '!**/*.yml' '!**/*.yaml'",
     "typecheck": "tsc --noEmit",
-    "build": "tsc && tsup",
-    "prepack": "yarn build && yarn npmignore --auto",
-    "prepare": "husky",
-    "release": "semantic-release",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "prepare": "lefthook install",
+    "prepack": "pnpm build"
+  },
+  "devDependencies": {
+    "@react-router/node": "^7.9.1",
+    "@types/aws-lambda": "^8.10.152",
+    "@types/node": "^25.2.3",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitest/coverage-v8": "^3.2.4",
+    "lefthook": "^2.1.9",
+    "oxfmt": "^0.54.0",
+    "oxlint": "^1.69.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-router": "^7.9.1",
+    "rimraf": "^6.1.2",
+    "tsdown": "^0.22.2",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
   },
   "peerDependencies": {
     "@react-router/node": "^7.9.1",
     "react-router": "^7.9.1"
   },
-  "devDependencies": {
-    "@biomejs/biome": "^2.2.2",
-    "@eslint/js": "^9.22.0",
-    "@react-router/node": "^7.9.1",
-    "@semantic-release/exec": "^7.0.3",
-    "@types/aws-lambda": "^8.10.152",
-    "@types/node": "^20.19.17",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "@vitest/coverage-v8": "^3.2.4",
-    "eslint": "^9.22.0",
-    "husky": "^9.1.7",
-    "lint-staged": "^15.5.0",
-    "npmignore": "^0.3.1",
-    "prettier": "3.5.3",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "react-router": "^7.9.1",
-    "semantic-release": "^24.2.3",
-    "tsup": "^8.4.0",
-    "typescript": "^5.9.2",
-    "typescript-eslint": "^8.41.0",
-    "vitest": "^3.2.4"
+  "engines": {
+    "node": ">=24"
   },
-  "packageManager": "yarn@4.9.4+sha512.7b1cb0b62abba6a537b3a2ce00811a843bea02bcf53138581a6ae5b1bf563f734872bd47de49ce32a9ca9dcaff995aa789577ffb16811da7c603dcf69e73750b",
-  "release": {
-    "plugins": [
-      "@semantic-release/commit-analyzer",
-      "@semantic-release/release-notes-generator",
-      [
-        "@semantic-release/exec",
-        {
-          "verifyConditionsCmd": "echo //npm.pkg.github.com/:_authToken=${process.env.GITHUB_TOKEN} > /tmp/github.npmrc && npm whoami --userconfig /tmp/github.npmrc --registry https://npm.pkg.github.com/",
-          "publishCmd": "npm publish --userconfig /tmp/github.npmrc --tag ${nextRelease.channel || 'latest'} --registry https://npm.pkg.github.com/ --no-git-tag-version",
-          "successCmd": "rm /tmp/github.npmrc",
-          "failCmd": "rm /tmp/github.npmrc"
-        }
-      ],
-      "@semantic-release/npm",
-      "@semantic-release/github"
-    ]
-  },
-  "publishConfig": {
-    "ignore": [
-      "!dist/**",
-      "src/",
-      ".*",
-      "tsconfig.json",
-      "tsup.config.ts"
-    ],
-    "access": "public",
-    "provenance": true
-  },
-  "lint-staged": {
-    "*.{ts,tsx,js,cjs,mjs}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "!(*.ts|*.tsx|*.js|*.cjs|*.mjs)": "prettier --ignore-unknown --write"
-  },
-  "prettier": {
-    "printWidth": 120,
-    "trailingComma": "all"
-  }
+  "packageManager": "pnpm@11.5.3+sha512.7ac1c919341c213a34dc0d02afb7143c5c26ac26ee8c4782deea821b8ac64d2134a081fd8941dae6e29bbb48f58dfc2b7fbceeccc07cb2f09d219d342a4969ed"
 }
