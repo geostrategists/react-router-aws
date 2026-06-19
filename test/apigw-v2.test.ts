@@ -83,9 +83,9 @@ describe("API Gateway v2 request handling", () => {
       },
       apiGatewayV2Event("/test", "GET", {
         "x-forwarded-host": "forwarded.example.com",
-        "cloudfront-viewer-host": "viewer.example.com",
+        "x-viewer-host": "viewer.example.com",
       }),
-      { getHost: (event) => event.headers["cloudfront-viewer-host"] },
+      { getHost: (event) => event.headers["x-viewer-host"] },
     );
   });
 

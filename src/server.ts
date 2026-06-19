@@ -53,13 +53,15 @@ export type CreateRequestHandlerArgs<T> = {
    *
    * Use this when the default forwarded host is not the host the browser sees.
    * For example, a Lambda Function URL behind CloudFront cannot use its
-   * request-context domain name (always the internal `*.lambda-url` host) — the
-   * trusted viewer host is forwarded in a header such as `cloudfront-viewer-host`:
+   * request-context domain name (always the internal `*.lambda-url` host), and
+   * CloudFront does not forward the viewer host by default. Forward it yourself
+   * (e.g. a CloudFront Function copying the viewer `Host` into a custom header)
+   * and read that header here:
    *
    * ```ts
    * createFunctionURLRequestHandler({
    *   build,
-   *   getHost: (event) => event.headers["cloudfront-viewer-host"],
+   *   getHost: (event) => event.headers["x-viewer-host"],
    * });
    * ```
    *

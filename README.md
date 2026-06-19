@@ -73,10 +73,21 @@ sanitized (invalid characters stripped, port validated) before use.
 
 If the default forwarded host is not the host the browser actually sees, use the
 `getHost` option to derive it yourself. The most common case is a **Lambda
-Function URL behind CloudFront**: its `event.requestContext.domainName` is always
-the internal `*.lambda-url.<region>.on.aws` host (and cannot be overridden), so
-you must read the viewer host from a trusted header CloudFront forwards, such as
-`cloudfront-viewer-host`:
+Function URL behind CloudFront**: `event.requestContext.domainName` is always the
+internal `*.lambda-url.<region>.on.aws` host (and cannot be overridden), and
+CloudFront does not forward the viewer's host to the origin — the managed
+`AllViewerExceptHostHeader` policy (recommended for Function URL / API Gateway
+origins) sets `Host` to the origin domain. So you must forward the viewer host
+yourself, typically with a CloudFront Function on the viewer request that copies
+it into a header, then read that header via `getHost`:
+
+```javascript
+// CloudFront Function (viewer request): copy the viewer host into a custom header
+function handler(event) {
+  event.request.headers["x-viewer-host"] = { value: event.request.headers.host.value };
+  return event.request;
+}
+```
 
 ```javascript
 // lambda-handler.ts
@@ -85,9 +96,12 @@ import { createFunctionURLRequestHandler } from "@geostrategists/react-router-aw
 
 export const handler = createFunctionURLRequestHandler({
   build,
-  getHost: (event) => event.headers["cloudfront-viewer-host"],
+  getHost: (event) => event.headers["x-viewer-host"],
 });
 ```
+
+(If you copy the viewer host into `x-forwarded-host` instead, the default already
+picks it up and `getHost` isn't needed.)
 
 `getHost` receives the (correctly typed) gateway event and may return a host
 string, or `undefined`/`null` to fall back to the default `x-forwarded-host`
