@@ -4,3 +4,7 @@ allowBuilds:
 
 minimumReleaseAge: 1440
 trustPolicy: no-downgrade
+# undici-types is a types-only package (no runtime code); 6.21.0 dropped
+# provenance vs an earlier release. Required transitively by @types/node@22.
+trustPolicyExclude:
+  - undici-types@6.21.0
