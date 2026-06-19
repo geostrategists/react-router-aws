@@ -3,8 +3,8 @@ import type { APIGatewayProxyEvent, APIGatewayProxyEventHeaders, APIGatewayProxy
 import { URLSearchParams } from "url";
 
 import { isBinaryType } from "../binaryTypes";
-import type { ReactRouterAdapter } from "./index";
 import { resolveHost } from "./host";
+import type { ReactRouterAdapter } from "./index";
 
 function createReactRouterRequestAPIGatewayV1(
   event: APIGatewayProxyEvent,

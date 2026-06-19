@@ -6,8 +6,8 @@ import type {
 } from "aws-lambda";
 
 import { isBinaryType } from "../binaryTypes";
-import type { ReactRouterAdapter } from "./index";
 import { resolveHost } from "./host";
+import type { ReactRouterAdapter } from "./index";
 
 export function createReactRouterRequestAPIGateywayV2(
   event: APIGatewayProxyEventV2,

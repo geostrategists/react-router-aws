@@ -3,8 +3,8 @@ import type { ALBEvent, ALBEventHeaders, ALBResult } from "aws-lambda";
 import { URLSearchParams } from "url";
 
 import { isBinaryType } from "../binaryTypes";
-import type { ReactRouterAdapter } from "./index";
 import { resolveHost } from "./host";
+import type { ReactRouterAdapter } from "./index";
 
 // ALB events carry no trusted request-context domain name, so
 // `useRequestContextDomainName` does not apply here and is ignored.

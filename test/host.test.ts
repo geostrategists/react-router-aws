@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { resolveHost } from "../src/adapters/host";
 
 describe("resolveHost", () => {
