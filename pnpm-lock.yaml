@@ -9,7 +9,7 @@ importers:
   .:
     devDependencies:
       '@react-router/node':
-        specifier: ^7.9.1
+        specifier: ^7.18.0
         version: 7.18.0(react-router@7.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(typescript@5.9.3)
       '@types/aws-lambda':
         specifier: ^8.10.152
@@ -42,7 +42,7 @@ importers:
         specifier: ^19.1.1
         version: 19.2.7(react@19.2.7)
       react-router:
-        specifier: ^7.9.1
+        specifier: ^7.18.0
         version: 7.18.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       rimraf:
         specifier: ^6.1.2
