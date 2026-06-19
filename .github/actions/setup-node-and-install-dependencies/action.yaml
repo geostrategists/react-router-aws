@@ -1,0 +1,44 @@
+name: "Setup Node and Install Dependencies"
+description: "Setup Node and run pnpm install with caches"
+
+outputs:
+  cache-paths:
+    description: "Paths cached by the pnpm cache"
+    value: ${{ steps.cache-vars.outputs.cache-paths }}
+runs:
+  using: "composite"
+  steps:
+    - name: Install Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version-file: .nvmrc
+        package-manager-cache: false
+
+    - name: Enable Corepack
+      shell: bash
+      run: corepack enable
+
+    - name: Define cache vars
+      id: cache-vars
+      shell: bash
+      run: |
+        EOF=EOF$(openssl rand -hex 8)
+        echo "cache-key=$CACHE_PREFIX-pnpmCache-${{ hashFiles('pnpm-lock.yaml') }}" >> $GITHUB_OUTPUT
+        echo "cache-key-restore=$CACHE_PREFIX-pnpmCache-" >> $GITHUB_OUTPUT
+        {
+          echo "cache-paths<<$EOF"
+          echo "$(pnpm store path --silent)"
+          echo "$EOF"
+        } >> $GITHUB_OUTPUT
+      env:
+        CACHE_PREFIX: ${{ runner.os }}-${{ runner.arch }}
+
+    - uses: actions/cache@v5
+      with:
+        path: ${{ steps.cache-vars.outputs.cache-paths }}
+        key: ${{ steps.cache-vars.outputs.cache-key }}
+        restore-keys: ${{ steps.cache-vars.outputs.cache-key-restore }}
+
+    - name: Install Dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile

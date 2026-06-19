@@ -1,0 +1,24 @@
+# cf https://github.com/marketplace/actions/release-drafter
+name-template: 'v$RESOLVED_VERSION 🧪'
+tag-template: 'v$RESOLVED_VERSION'
+prerelease: true
+prerelease-identifier: rc
+version-resolver:
+  major:
+    labels:
+      - major
+  minor:
+    labels:
+      - minor
+  patch:
+    labels:
+      - patch
+  default: patch
+exclude-labels:
+  - ignore-for-release
+change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
+change-title-escapes: '\<*_&'
+template: |
+  ## Changes
+
+  $CHANGES

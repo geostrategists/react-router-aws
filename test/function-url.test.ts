@@ -1,6 +1,7 @@
-import { describe, expect, it } from "vitest";
-import { htmlResponse, invokeHandlerWithRRMock, redirectResponse } from "./utils";
 import type { LambdaFunctionURLEvent } from "aws-lambda";
+import { describe, expect, it } from "vitest";
+
+import { htmlResponse, invokeHandlerWithRRMock, redirectResponse } from "./utils";
 
 function lambdaFunctionUrlEvent(
   path: string,

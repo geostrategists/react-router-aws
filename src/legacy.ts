@@ -1,11 +1,12 @@
-/* biome-ignore-all lint/suspicious/noExplicitAny: we need the any in extends parameters */
+import type { ALBEvent, APIGatewayProxyEvent, APIGatewayProxyEventV2, LambdaFunctionURLEvent } from "aws-lambda";
+
+import type { ReactRouterAdapter } from "./adapters";
+/* eslint-disable @typescript-eslint/no-explicit-any -- we need the any in extends parameters */
 import type { ApiGatewayV1Adapter } from "./adapters/api-gateway-v1";
 import type { ApiGatewayV2Adapter } from "./adapters/api-gateway-v2";
 import type { ApplicationLoadBalancerAdapter } from "./adapters/application-load-balancer";
 import type { FunctionUrlStreamingAdapter } from "./adapters/function-url-streaming";
 import type { CreateRequestHandlerArgs } from "./server";
-import type { ReactRouterAdapter } from "./adapters";
-
 import {
   createALBRequestHandler,
   createAPIGatewayV1RequestHandler,
@@ -13,7 +14,6 @@ import {
   createFunctionURLRequestHandler,
   createFunctionURLStreamingRequestHandler,
 } from "./server";
-import type { ALBEvent, APIGatewayProxyEvent, APIGatewayProxyEventV2, LambdaFunctionURLEvent } from "aws-lambda";
 
 export enum AWSProxy {
   APIGatewayV1 = "APIGatewayV1",
@@ -33,12 +33,10 @@ export type InferAdapter<T extends AWSProxy> = T extends AWSProxy.APIGatewayV1
         ? FunctionUrlStreamingAdapter
         : never;
 
-type InferEventType<T extends AWSProxy> = InferAdapter<T> extends ReactRouterAdapter<infer E, any, any, any>
-  ? E
-  : never;
-type InferHandlerType<T extends AWSProxy> = InferAdapter<T> extends ReactRouterAdapter<any, any, any, infer H>
-  ? H
-  : never;
+type InferEventType<T extends AWSProxy> =
+  InferAdapter<T> extends ReactRouterAdapter<infer E, any, any, any> ? E : never;
+type InferHandlerType<T extends AWSProxy> =
+  InferAdapter<T> extends ReactRouterAdapter<any, any, any, infer H> ? H : never;
 
 /**
  * Returns a request handler for AWS that serves the response using React Router.

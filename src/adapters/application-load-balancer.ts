@@ -1,10 +1,8 @@
-import type { ALBEvent, ALBEventHeaders, ALBResult } from "aws-lambda";
-
 import { readableStreamToString } from "@react-router/node";
+import type { ALBEvent, ALBEventHeaders, ALBResult } from "aws-lambda";
 import { URLSearchParams } from "url";
 
 import { isBinaryType } from "../binaryTypes";
-
 import type { ReactRouterAdapter } from "./index";
 
 function createReactRouterRequestALB(event: ALBEvent): Request {

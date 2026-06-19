@@ -64,8 +64,10 @@ const binaryTypes = [
   "application/zip",
 ];
 
-export function isBinaryType(contentType: string | null | undefined) {
-  if (!contentType) return false;
+export function isBinaryType(contentType: string | null | undefined): boolean {
+  if (!contentType) {
+    return false;
+  }
   const [test] = contentType.split(";");
   return binaryTypes.includes(test);
 }

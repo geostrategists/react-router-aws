@@ -1,0 +1,41 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["import", "typescript"],
+  "categories": {
+    "correctness": "error"
+  },
+  "env": {
+    "builtin": true,
+    "es2024": true,
+    "browser": true,
+    "node": true
+  },
+  "ignorePatterns": ["**/dist/**", "**/node_modules/**"],
+  "rules": {
+    "import/no-duplicates": "error",
+    "eqeqeq": ["error", "smart"],
+    "no-shadow": ["error", { "hoist": "all" }],
+    "prefer-const": "error",
+    "curly": ["error", "all"],
+    "@typescript-eslint/ban-ts-comment": [
+      "error",
+      {
+        "ts-ignore": "allow-with-description",
+        "minimumDescriptionLength": 10
+      }
+    ],
+    "@typescript-eslint/explicit-module-boundary-types": "error",
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/no-unsafe-function-type": "error",
+    "@typescript-eslint/no-wrapper-object-types": "error"
+  },
+  "overrides": [
+    {
+      "files": ["test/**"],
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/explicit-module-boundary-types": "off"
+      }
+    }
+  ]
+}

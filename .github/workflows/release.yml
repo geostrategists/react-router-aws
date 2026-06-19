@@ -1,59 +1,88 @@
-name: Release
+name: 🚀 Release
 
 on:
-  push:
-    branches:
-      - main
-
-env:
-  HUSKY: 0
+  release:
+    types: [published]
 
 permissions:
   contents: read
 
 jobs:
-  release:
-    name: Release
+  publish:
+    name: Publish
     runs-on: ubuntu-latest
     permissions:
-      contents: write # to be able to publish a GitHub release
-      issues: write # to be able to comment on released issues
-      pull-requests: write # to be able to comment on released pull requests
-      id-token: write # to enable use of OIDC for npm provenance
-      packages: write
-
+      contents: read
+      packages: write # to publish to GitHub Packages
+      id-token: write # to enable OIDC for npm provenance
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
+          ref: ${{ github.event.release.tag_name }}
           fetch-depth: 0
 
-      - name: Cache .yarn/cache
-        uses: actions/cache@v4
-        env:
-          cache-name: yarn-cache
-        with:
-          path: .yarn/cache
-          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ env.cache-name }}
+      - name: Validate release type consistency
+        run: |
+          TAG_NAME="${{ github.event.release.tag_name }}"
+          IS_PRERELEASE="${{ github.event.release.prerelease }}"
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 'lts/*'
+          # Check if tag has a pre-release suffix (e.g., -rc1, -beta.1, -alpha.2)
+          if [[ "$TAG_NAME" =~ -[a-zA-Z] ]]; then
+            TAG_HAS_PRERELEASE="true"
+          else
+            TAG_HAS_PRERELEASE="false"
+          fi
 
-      - name: Enable Corepack
-        run: corepack enable
+          if [ "$TAG_HAS_PRERELEASE" != "$IS_PRERELEASE" ]; then
+            echo "::error::Mismatch between tag name and release type. Tag '$TAG_NAME' $([ "$TAG_HAS_PRERELEASE" = "true" ] && echo "has" || echo "does not have") a pre-release suffix, but the GitHub release pre-release flag is set to '$IS_PRERELEASE'. Either both must indicate a pre-release, or neither."
+            exit 1
+          fi
 
-      - name: Install dependencies
-        run: yarn install --immutable
+      - name: Setup Node and Install Dependencies
+        uses: ./.github/actions/setup-node-and-install-dependencies
 
       - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
         run: npm audit signatures
 
-      - name: Release
-        run: yarn release
+      - name: Determine version and dist-tag
+        id: meta
+        run: |
+          TAG_NAME="${{ github.event.release.tag_name }}"
+          echo "version=${TAG_NAME#v}" >> $GITHUB_OUTPUT
+          if [ "${{ github.event.release.prerelease }}" = "true" ]; then
+            echo "tag=next" >> $GITHUB_OUTPUT
+          else
+            echo "tag=latest" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set package version
+        run: pnpm version "${{ steps.meta.outputs.version }}" --no-git-tag-version --allow-same-version
+
+      - name: Build
+        run: pnpm build
+
+      # --- Publish to npmjs (public, with provenance) ---
+      - name: Configure npmjs registry
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Publish to npmjs
+        run: pnpm publish --no-git-checks --provenance --access public --tag "${{ steps.meta.outputs.tag }}"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
+
+      # --- Publish to GitHub Packages ---
+      - name: Configure GitHub Packages registry
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+          registry-url: "https://npm.pkg.github.com"
+
+      - name: Publish to GitHub Packages
+        run: pnpm publish --no-git-checks --provenance --access public --tag "${{ steps.meta.outputs.tag }}" --registry https://npm.pkg.github.com/
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

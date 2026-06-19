@@ -1,4 +1,3 @@
-// biome-ignore-all lint: keep close to upstream
 /**
  * Copyright 2022 Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *

@@ -2,8 +2,9 @@
 // which is MIT licensed according to https://www.npmjs.com/package/lambda-stream
 
 import type { StreamifyHandler } from "aws-lambda";
-import { ResponseStream } from "./ResponseStream";
+
 import { HttpResponseStream } from "./HttpResponseStream";
+import { ResponseStream } from "./ResponseStream";
 
 export function streamifyResponse<TEvent = any, TResult = void>(
   handler: StreamifyHandler<TEvent, TResult>,
