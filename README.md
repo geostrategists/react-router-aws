@@ -62,10 +62,11 @@ export const handler = createAPIGatewayV2RequestHandler({
 
 ### Request host & CSRF (`getHost`)
 
-React Router derives the host used for its built-in cross-origin (CSRF) check on
-action requests from the constructed request URL (`new URL(request.url).host`),
-comparing it against the incoming `Origin` header. It is therefore important that
-the adapter builds that host from a source you trust.
+Since `react-router@7.18.0`, React Router derives the host used for its built-in
+cross-origin (CSRF) check on action requests from the constructed request URL
+(`new URL(request.url).host`), comparing it against the incoming `Origin` header.
+It is therefore important that the adapter builds that host from a source you
+trust. (This is why this package requires `react-router@^7.18.0`.)
 
 > [!IMPORTANT]
 > When `getHost` is **not** set, the adapter picks the host source
