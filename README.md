@@ -68,17 +68,16 @@ comparing it against the incoming `Origin` header. It is therefore important tha
 the adapter builds that host from a source you trust.
 
 > [!IMPORTANT]
-> When `getHost` is **not** set, the adapter picks the host source based on its
-> major version:
+> When `getHost` is **not** set, the adapter picks the host source
+> automatically. This is subject to change in the next major release:
 >
 > - **Currently** it uses the `x-forwarded-host` header (falling back to the
 >   `host`/`Host` header). This header is **client-controlled** and can be
 >   spoofed, so trusting it should be a deliberate choice.
-> - **In the next major version** it will use the AWS-provided, non-spoofable
->   request-context domain name (`event.requestContext.domainName`), to align
->   with the upstream `@react-router/architect` adapter. This field does not
->   exist on ALB events, so ALB will continue to fall back to `host`/`Host`
->   unless you set `getHost`.
+> - **In the next major version**, therefore, it will use the AWS-provided,
+>   non-spoofable request-context domain name (`event.requestContext.domainName`),
+>   to align with the upstream `@react-router/architect` adapter. For ALB, which
+>   does not provide a `requestContext`, `getHost` will be mandatory.
 >
 > Set `getHost` explicitly to pin the behavior you want — it then applies on both
 > the current and the next major version, so you won't be surprised by the
