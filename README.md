@@ -62,24 +62,67 @@ export const handler = createAPIGatewayV2RequestHandler({
 
 ### Request host & CSRF (`getHost`)
 
-React Router derives the host used for its built-in cross-origin (CSRF) check on
-action requests from the constructed request URL (`new URL(request.url).host`),
-comparing it against the incoming `Origin` header. It is therefore important that
-the adapter builds that host from a source you trust.
+Since `react-router@7.18.0`, React Router derives the host used for its built-in
+cross-origin (CSRF) check on action requests from the constructed request URL
+(`new URL(request.url).host`), comparing it against the incoming `Origin` header.
+It is therefore important that the adapter builds that host from a source you
+trust. (This is why this package requires `react-router@^7.18.0`.)
 
-By default the adapters build the host from the `x-forwarded-host` header
-(falling back to the `host`/`Host` header). The resolved value is always
-sanitized (invalid characters stripped, port validated) before use.
+Use the `getHost` option to derive the host yourself. It receives the (correctly
+typed) gateway event and returns a host string, or `undefined`/`null` to fall
+back to the default described below. The returned value is always sanitized
+(invalid characters stripped, port validated). It is supported by all handlers
+(API Gateway v1, API Gateway v2, Lambda Function URL buffered & streaming, and
+ALB).
 
-If the default forwarded host is not the host the browser actually sees, use the
-`getHost` option to derive it yourself. The most common case is a **Lambda
-Function URL behind CloudFront**: `event.requestContext.domainName` is always the
-internal `*.lambda-url.<region>.on.aws` host (and cannot be overridden), and
+> [!IMPORTANT]
+> When `getHost` is **not** set, the adapter picks the host source
+> automatically. This is subject to change in the next major release:
+>
+> - **Currently** it uses the `x-forwarded-host` header (falling back to the
+>   `host`/`Host` header). This header is only trustworthy if your proxy
+>   infrastructure sets it (and strips any incoming value) — otherwise it is
+>   **client-controlled** and can be spoofed, so trusting it should be a
+>   deliberate choice based on your setup.
+> - **In the next major version**, therefore, it will use the AWS-provided,
+>   non-spoofable request-context domain name (`event.requestContext.domainName`),
+>   to align with the upstream `@react-router/architect` adapter. ALB has no
+>   `requestContext` domain name, so it will use the `Host` header instead —
+>   which, unlike `x-forwarded-host`, is a forbidden request header that a
+>   browser will not let a cross-origin script forge.
+>
+> Set `getHost` explicitly to pin the behavior you want — it then applies on both
+> the current and the next major version, so you won't be surprised by the
+> default flip.
+
+**To opt in to the next major's behavior today** — derive the host from the
+AWS-provided request-context domain name:
+
+```javascript
+export const handler = createAPIGatewayV2RequestHandler({
+  build,
+  getHost: (event) => event.requestContext.domainName,
+});
+```
+
+**To keep using `x-forwarded-host` after the next major** — set it explicitly:
+
+```javascript
+export const handler = createAPIGatewayV2RequestHandler({
+  build,
+  getHost: (event) => event.headers["x-forwarded-host"],
+});
+```
+
+#### Example: Lambda Function URL behind CloudFront
+
+This setup needs special handling: `event.requestContext.domainName` is always
+the internal `*.lambda-url.<region>.on.aws` host (and cannot be overridden), and
 CloudFront does not forward the viewer's host to the origin — the managed
 `AllViewerExceptHostHeader` policy (recommended for Function URL / API Gateway
-origins) sets `Host` to the origin domain. So you must forward the viewer host
-yourself, typically with a CloudFront Function on the viewer request that copies
-it into a header, then read that header via `getHost`:
+origins) sets `Host` to the origin domain. So neither default works: forward the
+viewer host yourself with a CloudFront Function on the viewer request, then read
+that header via `getHost`:
 
 ```javascript
 // CloudFront Function (viewer request): copy the viewer host into a custom header.
@@ -106,26 +149,9 @@ export const handler = createFunctionURLRequestHandler({
 });
 ```
 
-(If you copy the viewer host into `x-forwarded-host` instead, the default already
-picks it up and `getHost` isn't needed.)
-
-`getHost` receives the (correctly typed) gateway event and may return a host
-string, or `undefined`/`null` to fall back to the default `x-forwarded-host`
-behavior. It is supported by all handlers (API Gateway v1, API Gateway v2, Lambda
-Function URL buffered & streaming, and ALB). For example, to prefer the
-API Gateway request-context domain name: `getHost: (event) => event.requestContext.domainName`.
-
-> [!IMPORTANT]
-> The default currently uses the `x-forwarded-host` header, which is
-> **client-controlled** and can be spoofed. Because that host drives React
-> Router's CSRF check, trusting it should be a deliberate choice. To make the
-> safe option the default (and to align with the upstream
-> `@react-router/architect` adapter), the default **will change to the
-> AWS-provided, non-spoofable request-context domain name
-> (`event.requestContext.domainName`) in the next major version**. After that,
-> relying on `x-forwarded-host` (or any other forwarded header) becomes an
-> explicit opt-in via `getHost`. Setups where the request-context host is not the
-> browser-facing host (e.g. Function URLs behind CloudFront) must set `getHost`.
+(If you copy the viewer host into `x-forwarded-host` instead, the current default
+already picks it up — but setting `getHost` explicitly keeps it working after the
+next major too.)
 
 ### Streaming support for Lambda Function URLs
 
