@@ -76,7 +76,9 @@ the adapter builds that host from a source you trust.
 >   spoofed, so trusting it should be a deliberate choice.
 > - **In the next major version** it will use the AWS-provided, non-spoofable
 >   request-context domain name (`event.requestContext.domainName`), to align
->   with the upstream `@react-router/architect` adapter.
+>   with the upstream `@react-router/architect` adapter. This field does not
+>   exist on ALB events, so ALB will continue to fall back to `host`/`Host`
+>   unless you set `getHost`.
 >
 > Set `getHost` explicitly to pin the behavior you want — it then applies on both
 > the current and the next major version, so you won't be surprised by the
