@@ -68,6 +68,13 @@ cross-origin (CSRF) check on action requests from the constructed request URL
 It is therefore important that the adapter builds that host from a source you
 trust. (This is why this package requires `react-router@^7.18.0`.)
 
+Use the `getHost` option to derive the host yourself. It receives the (correctly
+typed) gateway event and returns a host string, or `undefined`/`null` to fall
+back to the default described below. The returned value is always sanitized
+(invalid characters stripped, port validated). It is supported by all handlers
+(API Gateway v1, API Gateway v2, Lambda Function URL buffered & streaming, and
+ALB).
+
 > [!IMPORTANT]
 > When `getHost` is **not** set, the adapter picks the host source
 > automatically. This is subject to change in the next major release:
@@ -87,13 +94,6 @@ trust. (This is why this package requires `react-router@^7.18.0`.)
 > Set `getHost` explicitly to pin the behavior you want — it then applies on both
 > the current and the next major version, so you won't be surprised by the
 > default flip.
-
-Use the `getHost` option to derive the host yourself. It receives the (correctly
-typed) gateway event and returns a host string, or `undefined`/`null` to fall
-back to the default described above. The returned value is always sanitized
-(invalid characters stripped, port validated). It is supported by all handlers
-(API Gateway v1, API Gateway v2, Lambda Function URL buffered & streaming, and
-ALB).
 
 **To opt in to the next major's behavior today** — derive the host from the
 AWS-provided request-context domain name:
