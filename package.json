@@ -56,8 +56,8 @@
     "lefthook": "^2.1.9",
     "oxfmt": "^0.54.0",
     "oxlint": "^1.69.0",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
     "react-router": "^8.0.1",
     "rimraf": "^6.1.2",
     "tsdown": "^0.22.2",
@@ -69,7 +69,7 @@
     "react-router": "^8.0.0"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=22.22.0"
   },
   "packageManager": "pnpm@11.5.3+sha512.7ac1c919341c213a34dc0d02afb7143c5c26ac26ee8c4782deea821b8ac64d2134a081fd8941dae6e29bbb48f58dfc2b7fbceeccc07cb2f09d219d342a4969ed"
 }
