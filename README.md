@@ -72,8 +72,10 @@ the adapter builds that host from a source you trust.
 > automatically. This is subject to change in the next major release:
 >
 > - **Currently** it uses the `x-forwarded-host` header (falling back to the
->   `host`/`Host` header). This header is **client-controlled** and can be
->   spoofed, so trusting it should be a deliberate choice.
+>   `host`/`Host` header). This header is only trustworthy if your proxy
+>   infrastructure sets it (and strips any incoming value) — otherwise it is
+>   **client-controlled** and can be spoofed, so trusting it should be a
+>   deliberate choice.
 > - **In the next major version**, therefore, it will use the AWS-provided,
 >   non-spoofable request-context domain name (`event.requestContext.domainName`),
 >   to align with the upstream `@react-router/architect` adapter. ALB has no
