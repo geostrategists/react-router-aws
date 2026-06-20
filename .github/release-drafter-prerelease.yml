@@ -19,6 +19,7 @@ categories:
     when:
       labels:
         - patch
+  - title: "📝 Other Changes"
   - type: version-resolver
     semver-increment: patch
   - type: pre-exclude
