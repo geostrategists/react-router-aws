@@ -124,9 +124,6 @@ export const handler = createFunctionURLRequestHandler({
 });
 ```
 
-(You can copy the viewer host into any header name; just point `getHost` at the
-header you chose.)
-
 ### Streaming support for Lambda Function URLs
 
 React Router and React allow you to stream responses from the server to the client, reducing the TTFB (time to first byte)
