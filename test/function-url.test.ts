@@ -10,7 +10,7 @@ function lambdaFunctionUrlEvent(
   cookies?: string[],
 ): LambdaFunctionURLEvent {
   return {
-    requestContext: { http: { method } } as LambdaFunctionURLEvent["requestContext"],
+    requestContext: { http: { method }, domainName: "example.com" } as LambdaFunctionURLEvent["requestContext"],
     rawPath: path,
     rawQueryString: "",
     headers: {
@@ -35,6 +35,29 @@ describe("Function URL request handling", () => {
         return new Response("ok");
       },
       lambdaFunctionUrlEvent("/test", "POST", { "x-custom-header": "a" }),
+    );
+  });
+
+  it("uses requestContext.domainName by default", async () => {
+    await invokeHandlerWithRRMock(
+      "createFunctionURLRequestHandler",
+      (request) => {
+        expect(request.url).toBe("https://example.com/test");
+        return new Response("ok");
+      },
+      lambdaFunctionUrlEvent("/test", "GET", { "x-forwarded-host": "forwarded.example.com" }),
+    );
+  });
+
+  it("uses getHost to read a forwarded viewer host (CloudFront)", async () => {
+    await invokeHandlerWithRRMock(
+      "createFunctionURLRequestHandler",
+      (request) => {
+        expect(request.url).toBe("https://viewer.example.com/test");
+        return new Response("ok");
+      },
+      lambdaFunctionUrlEvent("/test", "GET", { "x-viewer-host": "viewer.example.com" }),
+      { getHost: (event) => event.headers["x-viewer-host"] },
     );
   });
 });

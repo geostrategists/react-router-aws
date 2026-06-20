@@ -33,6 +33,17 @@ describe("ALB request handling", () => {
     );
   });
 
+  it("uses the Host header by default (ignoring x-forwarded-host)", async () => {
+    await invokeHandlerWithRRMock(
+      "createALBRequestHandler",
+      async (request: Request) => {
+        expect(request.url).toBe("https://example.com/test");
+        return new Response("ok");
+      },
+      albEvent("/test", "GET", { "x-forwarded-host": "forwarded.example.com" }),
+    );
+  });
+
   it("strips invalid characters from the host", async () => {
     await invokeHandlerWithRRMock(
       "createALBRequestHandler",
@@ -40,7 +51,7 @@ describe("ALB request handling", () => {
         expect(request.url).toBe("https://example.com:4444/test");
         return new Response("ok");
       },
-      albEvent("/test", "GET", { "x-forwarded-host": "example.com:4444/invalid@chars" }),
+      albEvent("/test", "GET", { Host: "example.com:4444/invalid@chars" }),
     );
   });
 
