@@ -113,7 +113,7 @@ export const handler = createAPIGatewayV2RequestHandler({
 });
 ```
 
-#### Lambda Function URL behind CloudFront
+#### Example: Lambda Function URL behind CloudFront
 
 This setup needs special handling: `event.requestContext.domainName` is always
 the internal `*.lambda-url.<region>.on.aws` host (and cannot be overridden), and
