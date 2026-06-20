@@ -6,8 +6,9 @@
 This project provides adapters for running React Router Framework applications on AWS Lambda
 behind a number of different HTTP gateways.
 
-> Requires `react-router` and `@react-router/node` `>= 8`. For React Router 7
-> (`>= 7.18`), use the `0.x` release line of this package.
+> Requires `react-router` and `@react-router/node` `>= 8` (this is the `3.x`
+> release line). For React Router 7 (`>= 7.18`), use the `2.x` release line of
+> this package.
 
 ## 🚀 Supported gateways
 
