@@ -13,7 +13,7 @@ export function createReactRouterRequestAPIGateywayV2(
   event: APIGatewayProxyEventV2,
   getHost?: GetHostFunction<APIGatewayProxyEventV2>,
 ): Request {
-  const rawHost = getHost?.(event) ?? (event.headers["x-forwarded-host"] || event.headers.host);
+  const rawHost = getHost?.(event) ?? event.requestContext.domainName;
   const host = resolveHost(rawHost);
   const search = event.rawQueryString.length ? `?${event.rawQueryString}` : "";
   const scheme = event.headers["x-forwarded-proto"] || "http";

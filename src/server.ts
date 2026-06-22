@@ -10,11 +10,9 @@ import type {
 } from "aws-lambda";
 import type { StreamifyHandler } from "aws-lambda/handler";
 import {
-  type AppLoadContext,
   createRequestHandler as createReactRouterRequestHandler,
   type RouterContextProvider,
   type ServerBuild,
-  type UNSAFE_MiddlewareEnabled as MiddlewareEnabled,
 } from "react-router";
 
 import type { GetHostFunction, ReactRouterAdapter } from "./adapters";
@@ -32,9 +30,7 @@ type MaybePromise<T> = T | Promise<T>;
  * You can think of this as an escape hatch that allows you to pass
  * environment/platform-specific values through to your loader/action.
  */
-export type GetLoadContextFunction<E> = (
-  event: E,
-) => MiddlewareEnabled extends true ? MaybePromise<RouterContextProvider> : MaybePromise<AppLoadContext>;
+export type GetLoadContextFunction<E> = (event: E) => MaybePromise<RouterContextProvider>;
 
 export type CreateRequestHandlerArgs<T> = {
   build: ServerBuild;
@@ -48,33 +44,36 @@ export type CreateRequestHandlerArgs<T> = {
    * the incoming `Origin` header. The returned value is sanitized (invalid
    * characters stripped, port validated) before use.
    *
-   * Return `undefined`/`null` to fall back to the default: the
-   * `x-forwarded-host` header (falling back to the `host`/`Host` header).
+   * Return `undefined`/`null` to fall back to the default: the AWS-provided,
+   * non-spoofable request-context domain name (`event.requestContext.domainName`)
+   * for API Gateway v1/v2 and Lambda Function URLs, and the `Host` header for
+   * ALB (which has no request-context domain name).
    *
-   * Use this when the default forwarded host is not the host the browser sees.
-   * For example, a Lambda Function URL behind CloudFront cannot use its
-   * request-context domain name (always the internal `*.lambda-url` host), and
-   * CloudFront does not forward the viewer host by default. Forward it yourself
-   * (e.g. a CloudFront Function copying the viewer `Host` into a custom header)
-   * and read that header here:
+   * Use this when the default host is not the host the browser sees. Two common
+   * cases:
    *
-   * ```ts
-   * createFunctionURLRequestHandler({
-   *   build,
-   *   getHost: (event) => event.headers["x-viewer-host"],
-   * });
-   * ```
+   * - To trust a forwarded header (e.g. `x-forwarded-host`) instead of the
+   *   request-context domain name — only safe if your proxy infrastructure sets
+   *   it and strips any incoming value:
    *
-   * @remarks
-   * The default currently uses the `x-forwarded-host` header, which is
-   * client-controlled and can be spoofed. Because that host drives the CSRF
-   * check, trusting it should be deliberate: the default will change to the
-   * AWS-provided, non-spoofable request-context domain name
-   * (`event.requestContext.domainName`) in the next major version (aligning with
-   * the upstream `@react-router/architect` adapter), after which relying on a
-   * forwarded header becomes an explicit opt-in via `getHost`. Setups where the
-   * request-context host is not the browser-facing host (e.g. Function URLs
-   * behind CloudFront) must set `getHost`.
+   *   ```ts
+   *   createAPIGatewayV2RequestHandler({
+   *     build,
+   *     getHost: (event) => event.headers["x-forwarded-host"],
+   *   });
+   *   ```
+   *
+   * - A Lambda Function URL behind CloudFront: `event.requestContext.domainName`
+   *   is always the internal `*.lambda-url` host, and CloudFront does not forward
+   *   the viewer host by default. Forward it yourself (e.g. a CloudFront Function
+   *   copying the viewer `Host` into a custom header) and read that header here:
+   *
+   *   ```ts
+   *   createFunctionURLRequestHandler({
+   *     build,
+   *     getHost: (event) => event.headers["x-viewer-host"],
+   *   });
+   *   ```
    */
   getHost?: GetHostFunction<T>;
 };

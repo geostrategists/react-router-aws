@@ -10,7 +10,7 @@ function createReactRouterRequestAPIGatewayV1(
   event: APIGatewayProxyEvent,
   getHost?: GetHostFunction<APIGatewayProxyEvent>,
 ): Request {
-  const rawHost = getHost?.(event) ?? (event.headers["x-forwarded-host"] || event.headers.Host);
+  const rawHost = getHost?.(event) ?? event.requestContext.domainName;
   const host = resolveHost(rawHost);
   const scheme = event.headers["x-forwarded-proto"] || "http";
 

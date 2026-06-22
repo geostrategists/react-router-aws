@@ -10,7 +10,7 @@ function lambdaFunctionUrlEvent(
   cookies?: string[],
 ): LambdaFunctionURLEvent {
   return {
-    requestContext: { http: { method } } as LambdaFunctionURLEvent["requestContext"],
+    requestContext: { http: { method }, domainName: "example.com" } as LambdaFunctionURLEvent["requestContext"],
     rawPath: path,
     rawQueryString: "",
     headers: {

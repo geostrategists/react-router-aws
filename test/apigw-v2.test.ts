@@ -8,7 +8,7 @@ function apiGatewayV2Event(
   method = "GET",
   headers: Record<string, string> = {},
   cookies?: string[],
-  domainName?: string,
+  domainName = "example.com",
 ): APIGatewayProxyEventV2 {
   return {
     requestContext: { http: { method }, domainName } as APIGatewayProxyEventV2["requestContext"],
@@ -39,24 +39,7 @@ describe("API Gateway v2 request handling", () => {
     );
   });
 
-  it("uses x-forwarded-host by default", async () => {
-    await invokeHandlerWithRRMock(
-      "createAPIGatewayV2RequestHandler",
-      (request) => {
-        expect(request.url).toBe("https://forwarded.example.com/test");
-        return new Response("ok");
-      },
-      apiGatewayV2Event(
-        "/test",
-        "GET",
-        { "x-forwarded-host": "forwarded.example.com" },
-        undefined,
-        "context.example.com",
-      ),
-    );
-  });
-
-  it("uses getHost when provided (request context domain name)", async () => {
+  it("uses requestContext.domainName by default", async () => {
     await invokeHandlerWithRRMock(
       "createAPIGatewayV2RequestHandler",
       (request) => {
@@ -70,7 +53,24 @@ describe("API Gateway v2 request handling", () => {
         undefined,
         "context.example.com",
       ),
-      { getHost: (event) => event.requestContext.domainName },
+    );
+  });
+
+  it("uses getHost to trust a forwarded header", async () => {
+    await invokeHandlerWithRRMock(
+      "createAPIGatewayV2RequestHandler",
+      (request) => {
+        expect(request.url).toBe("https://forwarded.example.com/test");
+        return new Response("ok");
+      },
+      apiGatewayV2Event(
+        "/test",
+        "GET",
+        { "x-forwarded-host": "forwarded.example.com" },
+        undefined,
+        "context.example.com",
+      ),
+      { getHost: (event) => event.headers["x-forwarded-host"] },
     );
   });
 
@@ -89,14 +89,20 @@ describe("API Gateway v2 request handling", () => {
     );
   });
 
-  it("falls back to x-forwarded-host when getHost returns undefined", async () => {
+  it("falls back to requestContext.domainName when getHost returns undefined", async () => {
     await invokeHandlerWithRRMock(
       "createAPIGatewayV2RequestHandler",
       (request) => {
-        expect(request.url).toBe("https://forwarded.example.com/test");
+        expect(request.url).toBe("https://context.example.com/test");
         return new Response("ok");
       },
-      apiGatewayV2Event("/test", "GET", { "x-forwarded-host": "forwarded.example.com" }),
+      apiGatewayV2Event(
+        "/test",
+        "GET",
+        { "x-forwarded-host": "forwarded.example.com" },
+        undefined,
+        "context.example.com",
+      ),
       { getHost: () => undefined },
     );
   });
@@ -108,7 +114,7 @@ describe("API Gateway v2 request handling", () => {
         expect(request.url).toBe("https://example.com:4444/test");
         return new Response("ok");
       },
-      apiGatewayV2Event("/test", "GET", { "x-forwarded-host": "example.com:4444/invalid@chars" }),
+      apiGatewayV2Event("/test", "GET", {}, undefined, "example.com:4444/invalid@chars"),
     );
   });
 });

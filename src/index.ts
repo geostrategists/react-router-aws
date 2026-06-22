@@ -6,4 +6,3 @@ export {
   createFunctionURLRequestHandler,
   createFunctionURLStreamingRequestHandler,
 } from "./server";
-export { AWSProxy, createRequestHandler } from "./legacy";

@@ -1,6 +1,7 @@
 /**
  * Resolves the host used to build the `Request` URL from a raw host value
- * (e.g. an `x-forwarded-host`/`host` header or an API Gateway domain name).
+ * (e.g. an API Gateway request-context domain name, or a `Host`/forwarded
+ * header).
  *
  * React Router derives the host for its built-in cross-origin (CSRF) check on
  * action requests from `new URL(request.url).host`, so the host constructed

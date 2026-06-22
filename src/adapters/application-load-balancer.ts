@@ -8,7 +8,7 @@ import type { GetHostFunction, ReactRouterAdapter } from "./index";
 
 function createReactRouterRequestALB(event: ALBEvent, getHost?: GetHostFunction<ALBEvent>): Request {
   const headers = event?.headers || {};
-  const host = resolveHost(getHost?.(event) ?? (headers["x-forwarded-host"] || headers.Host));
+  const host = resolveHost(getHost?.(event) ?? headers.host ?? headers.Host);
   const scheme = headers["x-forwarded-proto"] || "http";
 
   const rawQueryString = new URLSearchParams(event.queryStringParameters as Record<string, string>).toString();
