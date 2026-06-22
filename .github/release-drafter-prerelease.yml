@@ -4,21 +4,22 @@ tag-template: 'v$RESOLVED_VERSION'
 prerelease: true
 prerelease-identifier: rc
 categories:
-  - type: version-resolver
+  - title: "💥 Breaking Changes"
     semver-increment: major
     when:
       labels:
         - major
-  - type: version-resolver
+  - title: "🚀 Features"
     semver-increment: minor
     when:
       labels:
         - minor
-  - type: version-resolver
+  - title: "🐛 Bug Fixes & Improvements"
     semver-increment: patch
     when:
       labels:
         - patch
+  - title: "📝 Documentation & Other Changes"
   - type: version-resolver
     semver-increment: patch
   - type: pre-exclude
