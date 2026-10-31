@@ -8,15 +8,12 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Install Node.js
-      uses: actions/setup-node@v6
+    - name: Install Node.js and pnpm
+      uses: pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e # v3.1.2
       with:
         node-version-file: .nvmrc
-        package-manager-cache: false
-
-    - name: Enable Corepack
-      shell: bash
-      run: corepack enable
+        install: false
+        cache: false
 
     - name: Define cache vars
       id: cache-vars
