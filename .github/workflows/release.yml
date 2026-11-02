@@ -63,7 +63,7 @@ jobs:
 
       # --- Publish to npmjs (public, with provenance) ---
       - name: Configure npmjs registry
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
           package-manager-cache: false
@@ -76,7 +76,7 @@ jobs:
 
       # --- Publish to GitHub Packages ---
       - name: Configure GitHub Packages registry
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
           package-manager-cache: false
