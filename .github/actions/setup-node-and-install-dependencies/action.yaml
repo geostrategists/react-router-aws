@@ -1,6 +1,11 @@
 name: "Setup Node and Install Dependencies"
 description: "Setup Node and run pnpm install with caches"
 
+inputs:
+  node-version:
+    description: "Node.js version override; defaults to .nvmrc"
+    required: false
+
 outputs:
   cache-paths:
     description: "Paths cached by the pnpm cache"
@@ -11,7 +16,8 @@ runs:
     - name: Install Node.js and pnpm
       uses: pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e # v3.1.2
       with:
-        node-version-file: .nvmrc
+        runtime: ${{ inputs.node-version && format('node@{0}', inputs.node-version) || '' }}
+        node-version-file: ${{ inputs.node-version && 'false' || '.nvmrc' }}
         install: false
         cache: false
 
