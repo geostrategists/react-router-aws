@@ -18,7 +18,6 @@ function createReactRouterRequestAPIGatewayV1(
   const search = rawQueryString.length > 0 ? `?${rawQueryString}` : "";
   const url = new URL(event.path + search, `${scheme}://${host}`);
 
-  const isFormData = event.headers["content-type"]?.includes("multipart/form-data");
   // Note: No current way to abort these for AWS, but our router expects
   // requests to contain a signal, so it can detect aborted requests
   const controller = new AbortController();
@@ -27,12 +26,7 @@ function createReactRouterRequestAPIGatewayV1(
     method: event.requestContext.httpMethod,
     headers: createReactRouterHeadersAPIGatewayV1(event.headers),
     signal: controller.signal,
-    body:
-      event.body && event.isBase64Encoded
-        ? isFormData
-          ? Buffer.from(event.body, "base64")
-          : Buffer.from(event.body, "base64").toString()
-        : event.body || undefined,
+    body: event.body && event.isBase64Encoded ? Buffer.from(event.body, "base64") : event.body || undefined,
   });
 }
 

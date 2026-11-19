@@ -185,4 +185,35 @@ describe("API Gateway v2 response handling", () => {
       cookies: ["b=2; Path=/"],
     });
   });
+
+  it("preserves binary request bodies", async () => {
+    const pngHeader = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0xff]);
+    await invokeHandlerWithRRMock(
+      "createAPIGatewayV2RequestHandler",
+      async (request) => {
+        expect(Buffer.from(await request.arrayBuffer())).toStrictEqual(pngHeader);
+        return new Response("ok");
+      },
+      {
+        ...apiGatewayV2Event("/upload", "POST", { "content-type": "image/png" }),
+        body: pngHeader.toString("base64"),
+        isBase64Encoded: true,
+      },
+    );
+  });
+
+  it("passes text request bodies through", async () => {
+    await invokeHandlerWithRRMock(
+      "createAPIGatewayV2RequestHandler",
+      async (request) => {
+        expect(await request.text()).toBe("a=1&b=2");
+        return new Response("ok");
+      },
+      {
+        ...apiGatewayV2Event("/form", "POST", { "content-type": "application/x-www-form-urlencoded" }),
+        body: "a=1&b=2",
+        isBase64Encoded: false,
+      },
+    );
+  });
 });
