@@ -150,4 +150,20 @@ describe("API Gateway v1 response handling", () => {
       isBase64Encoded: false,
     });
   });
+
+  it("preserves binary request bodies", async () => {
+    const pngHeader = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0xff]);
+    await invokeHandlerWithRRMock(
+      "createAPIGatewayV1RequestHandler",
+      async (request) => {
+        expect(Buffer.from(await request.arrayBuffer())).toStrictEqual(pngHeader);
+        return new Response("ok");
+      },
+      {
+        ...apiGatewayV1Event("/upload", "POST", { "content-type": "image/png" }),
+        body: pngHeader.toString("base64"),
+        isBase64Encoded: true,
+      },
+    );
+  });
 });

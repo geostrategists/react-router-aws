@@ -19,7 +19,6 @@ export function createReactRouterRequestAPIGateywayV2(
   const scheme = event.headers["x-forwarded-proto"] || "http";
 
   const url = new URL(event.rawPath + search, `${scheme}://${host}`);
-  const isFormData = event.headers["content-type"]?.includes("multipart/form-data");
   // Note: No current way to abort these for AWS, but our router expects
   // requests to contain a signal, so it can detect aborted requests
   const controller = new AbortController();
@@ -28,12 +27,7 @@ export function createReactRouterRequestAPIGateywayV2(
     method: event.requestContext.http.method,
     headers: createReactRouterHeadersAPIGatewayV2(event.headers, event.cookies),
     signal: controller.signal,
-    body:
-      event.body && event.isBase64Encoded
-        ? isFormData
-          ? Buffer.from(event.body, "base64")
-          : Buffer.from(event.body, "base64").toString()
-        : event.body,
+    body: event.body && event.isBase64Encoded ? Buffer.from(event.body, "base64") : event.body,
   });
 }
 
@@ -62,14 +56,19 @@ export function extractAPIGatewayV2ResponseMetadata(nodeResponse: Response): {
   cookies: string[];
 } {
   // AWS API Gateway will send back set-cookies outside of response headers.
+  // Build the header map instead of deleting from the response: headers of a
+  // `fetch()` response are immutable and `delete()` would throw.
   const cookies = nodeResponse.headers.getSetCookie();
-  if (cookies.length) {
-    nodeResponse.headers.delete("Set-Cookie");
+  const headers: Record<string, string> = {};
+  for (const [key, value] of nodeResponse.headers.entries()) {
+    if (key.toLowerCase() !== "set-cookie") {
+      headers[key] = value;
+    }
   }
 
   return {
     statusCode: nodeResponse.status,
-    headers: Object.fromEntries(nodeResponse.headers.entries()),
+    headers,
     cookies,
   };
 }

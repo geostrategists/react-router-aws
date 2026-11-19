@@ -12,7 +12,10 @@
  * Mirrors the hardening done by the upstream `@react-router/architect` adapter.
  */
 export function resolveHost(rawHost: string | undefined | null): string {
-  const [rawHostname = "", portStr] = (rawHost ?? "").split(":");
+  const raw = rawHost ?? "";
+  const ipv6 = /^\[.*?\]/;
+  const rawHostname = raw.match(ipv6)?.[0] ?? raw.split(":")[0] ?? "";
+  const [, portStr] = raw.replace(ipv6, "").split(":");
   const hostname = rawHostname.split(/[\\/?#@]/)[0] || "localhost";
   const hostPort = Number.parseInt(portStr ?? "", 10);
   const port = Number.isSafeInteger(hostPort) ? hostPort : undefined;
