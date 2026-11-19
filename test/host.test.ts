@@ -30,4 +30,11 @@ describe("resolveHost", () => {
   it("falls back to localhost when the hostname is only invalid characters", () => {
     expect(resolveHost("#invalid")).toBe("localhost");
   });
+
+  it("keeps a bracketed IPv6 address with and without port", () => {
+    expect(resolveHost("[::1]")).toBe("[::1]");
+    expect(resolveHost("[::1]:3333")).toBe("[::1]:3333");
+    expect(resolveHost("[2001:db8::1]:8443")).toBe("[2001:db8::1]:8443");
+    expect(() => new URL("https://" + resolveHost("[::1]:3333") + "/")).not.toThrow();
+  });
 });
