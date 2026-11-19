@@ -56,14 +56,19 @@ export function extractAPIGatewayV2ResponseMetadata(nodeResponse: Response): {
   cookies: string[];
 } {
   // AWS API Gateway will send back set-cookies outside of response headers.
+  // Build the header map instead of deleting from the response: headers of a
+  // `fetch()` response are immutable and `delete()` would throw.
   const cookies = nodeResponse.headers.getSetCookie();
-  if (cookies.length) {
-    nodeResponse.headers.delete("Set-Cookie");
+  const headers: Record<string, string> = {};
+  for (const [key, value] of nodeResponse.headers.entries()) {
+    if (key.toLowerCase() !== "set-cookie") {
+      headers[key] = value;
+    }
   }
 
   return {
     statusCode: nodeResponse.status,
-    headers: Object.fromEntries(nodeResponse.headers.entries()),
+    headers,
     cookies,
   };
 }

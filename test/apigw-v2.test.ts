@@ -216,4 +216,28 @@ describe("API Gateway v2 response handling", () => {
       },
     );
   });
+
+  it("handles immutable response headers with cookies (fetch() responses)", async () => {
+    const res = await invokeHandlerWithRRMock(
+      "createAPIGatewayV2RequestHandler",
+      () => {
+        const response = htmlResponse("a=1; Path=/");
+        const immutable = new (class extends Headers {
+          override delete(): never {
+            throw new TypeError("immutable");
+          }
+        })(response.headers);
+        Object.defineProperty(response, "headers", { value: immutable });
+        return response;
+      },
+      apiGatewayV2Event("/"),
+    );
+    expect(res).toStrictEqual({
+      statusCode: 200,
+      headers: { "content-type": "text/html" },
+      body: "<html>ok</html>",
+      isBase64Encoded: false,
+      cookies: ["a=1; Path=/"],
+    });
+  });
 });
